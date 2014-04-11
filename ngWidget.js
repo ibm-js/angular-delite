@@ -1,26 +1,66 @@
 define([], function () {
 
-	var _makeScope = function (props) { 
-		var scopeValue = {};
-		props.forEach(function (name) {
-			scopeValue[name] = "=";
-		});
-		return scopeValue; // {p: '=', ... }
+
+	// helpers
+	var isUndefined = function (value) {
+		return typeof value === "undefined";
 	};
 
-	var _makeArgs = function (props, scope) { 
-		var args = {};
-		props.forEach(function(p){
-			args[p] = scope[p];
+	var intersectArrays = function (arr1, arr2) {
+		var res = [];
+		arr1.forEach(function(p){
+			if (arr2.indexOf(p) !== -1) {
+				res.push(p);
+			}
 		});
-		return args; // {p: $scope.p, ... }
+		return res;
 	};
 
-	var _setWatchers = function (scope, props) {
+	var overwriteObject = function (obj1, obj2) {
+		Object.keys(obj2).forEach(function(p){
+			obj1[p] = obj2[p];
+		});
+		return obj1;
+	};
+
+	// properties of a widget
+	var getDefaultProps = function (constructor) {
+		// getting all the props
+		var instance = new constructor();
+		var allprops = Object.getPrototypeOf(instance)._getProps();
+		instance.destroy();
+
+		// filtring relevant props
+		var excluded = ["baseClass", "focused", "widgetId", "invalidProperties", "invalidRendering"];
+		var isExcluded = function (property) {
+			return (excluded.indexOf(property) === -1);
+		};
+		var props = allprops.filter(isExcluded);
+		return props;
+	};
+
+	var defaultScope = function (props) {
+		var s = {};
 		props.forEach(function(p){
+			s[p] = '@';
+		});
+		return s;
+	};
+
+	var makeIsolatedScope = function (constructor, overwrite) {
+		var myprops = getDefaultProps(constructor);
+		var s = defaultScope(myprops);
+		if (typeof overwrite === "object"){ // if overwrite defined, overwrite the scope
+			overwriteObject(s, overwrite);
+		}
+		return s;
+	};
+
+	var setWatchers = function (scope, props) {
+		Object.keys(props).forEach(function(p){
 			// if scope property changes, update widget property
 			scope.$watch(p, function (newValue) {
-				if (newValue){
+				if (! isUndefined(newValue)){
 					scope.widget[p] = newValue;
 				}
 			});
@@ -37,24 +77,25 @@ define([], function () {
 		return "ng" + name;
 	};
 
-	return function (name, widget, props) {
+	return function (name, widget, overwrite) {
 		angular.module(name, [])
 			.directive(_nameWidget(name), function () {
-				return {
+				var isolatedScope = makeIsolatedScope(widget, overwrite);
+				var directive = {
 					restrict: 'E',
-					scope: _makeScope(props),
-					controller: function ($scope) {
-						// init
-						$scope.widget = new widget(_makeArgs(props, $scope));
-					},
+					controller: function ($scope) { },
+					scope: isolatedScope,
 					link: function (scope, elem, attrs) {
 						// insert widget in angular directive
+						var mywidget = new widget();
+						scope.widget = mywidget;
 						elem.append(scope.widget);
 
-						// update widget.value when ngModel is changed
-						_setWatchers(scope, props);
+						// bind widget propreties with directive scope
+						setWatchers(scope, isolatedScope);
 					}
 				};
+				return directive;
 			});
 	};
 });
