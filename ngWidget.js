@@ -6,16 +6,6 @@ define([], function () {
 		return typeof value === "undefined";
 	};
 
-	var intersectArrays = function (arr1, arr2) {
-		var res = [];
-		arr1.forEach(function(p){
-			if (arr2.indexOf(p) !== -1) {
-				res.push(p);
-			}
-		});
-		return res;
-	};
-
 	var overwriteObject = function (obj1, obj2) {
 		Object.keys(obj2).forEach(function(p){
 			obj1[p] = obj2[p];
