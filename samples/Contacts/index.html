@@ -1,0 +1,60 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
+		<meta name="apple-mobile-web-app-capable" content="yes"/>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<title>StarRating</title>
+		<script data-main="../../../" src="/requirejs/require.js">
+			<script type="text/javascript">
+				require.config({
+					packages: [
+				{name: 'dcl'       , location: 'dcl'       } ,
+				{name: 'dojo'      , location: 'dojo'      } ,
+				{name: 'delite'    , location: 'delite'    } ,
+				{name: 'deliteful' , location: 'deliteful' } ,
+				{name: 'dojox'     , location: 'dojox'     } ,
+				{name: 'doh'       , location: 'util/doh'  }
+				],
+				locale: "en-us",
+				});
+			</script>
+			<script>
+				require([
+						"angular-delite/samples/Contacts/app",
+						"dojo/domReady!"
+						], function(){});
+			</script>
+			<style>
+				.book-key {font-weight:bold;}
+				body, table {font-size: 9px}
+			</style>
+
+		</head>
+		<body id="body-id" class="container">
+
+			<section id="app">
+				<div ng-controller="starrater" id="ctrl">
+					<ul>
+						<li ng-repeat="book in data.books">  
+							<a href="#" ng-click="selectBook(book.id)">
+								{{book.title}}
+								{{book.id}}
+							</a>
+						</li>
+					</ul>
+					<div ng-show="selectedBook">
+						<table>
+							<tbody>
+								<tr ng-repeat="(key, value) in selectedBook">
+									<td class="book-key">  {{key}}  </td>
+									<td> <input ng-model="selectedBook[key]" /> </td>
+								</tr>
+							</tbody>
+						</table>
+						<button ng-click="updateSelectedBook()">update</button>
+					</div>
+				</div>
+			</section>
+		</body>
+	</html>
