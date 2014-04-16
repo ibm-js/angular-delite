@@ -1,45 +1,110 @@
+var lol, lol1, p1, p2;
 require([
 		"dcl/dcl",
 		"dojo/has",
 		"delite/register",
 		"angular-delite/samples/Contacts/ngRest",
+		"angular-delite/samples/Contacts/ngStarRating",
 		"angular/angular",
 		"angular/resource",
 		"dojo/domReady!"
 		], function(dcl, has, register, ngRest){
 
-			var app = angular.module("app", [ "ngRest" ]);
+			angular.module("Model", ["ngRest"])
+				.factory("BookList", function (Rest) {
+					var rest = new Rest({target: "http://localhost:5000/books/"})
+					return rest;
+				})
+				.factory("Model", function (BookList) {
+					var model = {
+						books : null,
+						selected: null,
+						selectedisNew: false,
+						template: null,
+						getTitles: function(){
+							BookList.get("all").then(function (books) {
+								console.log("fetched again");
+								model.books = books;
+							});
+						},
+						getTemplate: function(){
+							BookList.get(0).then(function (book) {
+								model.template = angular.copy( book[0] );
+								p2 = model.template;
+								console.log(book, model.template);
+								Object.keys(model.template).forEach(function (key) {
+									model.template[key] = null;
+								});
 
-			app.factory("BookList", function (Rest, $q) {
-				var rest = new Rest({target: "http://localhost:5000/books/"})
-				return rest;
-			});
+								model.template["id"] = "" + model.books.length
+							});
+						},
+						getBook: function (id, callback) {
+							BookList.get(id).then(function (book) {
+								model.books[id] = book[0];
+								if (typeof callback !== undefined) {
+									callback(book);
+								}
+							});
+						},
+						updateBook: function (book) {
+							model.books[book.id] = angular.copy(book);
+							BookList.put(book);
+							model.selected = null;
+							model.selectedisNew = false;
+						}
+					}
 
+					// init
+					model.getTitles();
+					model.getTemplate();
+					return model;
+				})
+
+			angular.module("BookDetails", ["Model"])
+				.controller("BookDetailsCtrl", function ($scope, Model) {
+					$scope.data = Model;
+					$scope.updateBook = function () {
+						Model.updateBook($scope.data.selected);
+					}
+					p2 = Model
+				});
+
+			var app = angular.module("app", [ "BookDetails", "Model", "StarRating", "StarRatingEditable"]);
 
 			// a controller was added for debugging, not necessary
-			app.controller("starrater", 
-				function ($scope, BookList) {
-					$scope.value = 3
-					$scope.max = 6
-					$scope.data = {hello: "oui"}
-					// fetching the books
-					console.log("About to fetch all the data");
-					BookList.get("all").then(function (books) {
-						console.log("Got it");
-						$scope.data.books = books;
-					});
+			app.controller("BookListCtrl", 
+				function ($scope, BookList, Model) {
+					$scope.data = Model;
 
-					$scope.selectedBook = null;
 					$scope.selectBook = function (bookid) {
-						//$scope.selectedBook = $scope.data.books.filter(function(e){e.id == bookid})
-						BookList.get(bookid).then(function (book) {
-							$scope.selectedBook = book[0];
-						})
+						$scope.data.getBook(bookid, function () {
+							$scope.data.selected = angular.copy($scope.data.books[bookid])
+						});
 					};
-					$scope.updateSelectedBook = function(){
-						BookList.put($scope.selectedBook)
-						$scope.data.books[$scope.selectedBook.id] = $scope.selectedBook;
-					}
+
+					$scope.newBook = function () {
+						$scope.data.selected = angular.copy($scope.data.template);
+						$scope.data.selectedisNew = true;
+					};
+					//$scope.addNewBook = function () {
+						//BookList.get(0).then(function (book) {
+							//var exampleObject = book[0];
+							//$scope.newBook = {}
+							//for (k in exampleObject){
+								//$scope.newBook[k] = null;
+							//}
+							//$scope.newBook["id"] = $scope.data.books.length;
+							//$scope.newBook["title"] = "Un nouveau titre";
+							//BookSelector.selected = $scope.newBook;
+						//})
+					//};
+
+					//$scope.addBook = function () {
+						//$scope.data.books.set($scope.newBook.id, $scope.newBook);
+						//BookList.add($scope.newBook);
+						//$scope.newBook = null;
+					//};
 				});
 
 			// boostrapping my app on a particular DOM element

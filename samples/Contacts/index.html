@@ -4,6 +4,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes"/>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700|Open+Sans' rel='stylesheet' type='text/css'>
 		<title>StarRating</title>
 		<script data-main="../../../" src="/requirejs/require.js">
 			<script type="text/javascript">
@@ -27,32 +28,98 @@
 			</script>
 			<style>
 				.book-key {font-weight:bold;}
-				body, table {font-size: 9px}
+				body, table {
+					font-family: 'Open Sans', sans-serif;
+					font-size: 22px
+				}
+				.d-star-rating-star-icon {
+					height: 14px;
+					width: 13px;
+				}
+				.d-star-rating-empty-star:before {
+					margin-left: -13px;
+				}
+				.d-star-rating-star-icon:before {
+					content: url('../../../deliteful/samples/images/star-yellow.png');
+				}
+				.detail td, .book td {
+					padding:1px .5em;
+				}
+				.book {
+					background: white;
+					margin: 3px 0;
+					border-top: 6px #fafafa solid;
+					border-right: 1px #eaeaea solid;
+					border-bottom: 2px #eaeaea solid;
+
+				}
+				.book:hover {
+					cursor:pointer;
+					background:#fafafa;
+				}
+				body {
+					background:#FAFAFA
+				}
+				.view-details, .view-select {
+				}
+				.view-select {
+				}
+
+				.view-details {
+					margin-top: 3em;
+				}
+
 			</style>
 
 		</head>
 		<body id="body-id" class="container">
 
 			<section id="app">
-				<div ng-controller="starrater" id="ctrl">
-					<ul>
-						<li ng-repeat="book in data.books">  
-							<a href="#" ng-click="selectBook(book.id)">
-								{{book.title}}
-								{{book.id}}
-							</a>
-						</li>
-					</ul>
-					<div ng-show="selectedBook">
+
+				<div ng-controller="BookListCtrl" class="view-select">
+					<table>
+						<tbody>
+
+							<tr class="book" ng-repeat="book in data.books track by $index" ng-click="selectBook(book.id)">  
+								<td>
+										{{book.title}}
+								</td>
+								<td>
+									<ng-star-rating read-only="true" value="{{book.rating}}"></ng-star-rating>
+								</td>
+							</tr>
+
+						</tbody>
+					</table>
+
+					<button ng-click="newBook()">new</button>
+					<div ng-show="! newBook && data.books">
+						<button ng-click="addNewBook()">new</button>
+					</div>
+				</div> <!-- BookListCtrl ctrl -->
+
+
+				<div ng-controller="BookDetailsCtrl" class="view-details">
+					<div ng-show="data.selected">
 						<table>
 							<tbody>
-								<tr ng-repeat="(key, value) in selectedBook">
-									<td class="book-key">  {{key}}  </td>
-									<td> <input ng-model="selectedBook[key]" /> </td>
+								<tr class="detail" ng-repeat="(key, value) in data.selected">
+									<td class="book-key">  {{key|uppercase}}  </td>
+									<td> 
+										<input ng-if="key !== 'rating'" ng-model="data.selected[key]" /> 
+										<span ng-if="key === 'rating'">
+											<ng-star-rating-editable  value="data.selected['rating']"></ng-star-rating-editable>
+										</span>
+									</td>
 								</tr>
 							</tbody>
 						</table>
-						<button ng-click="updateSelectedBook()">update</button>
+						<span ng-show="!data.selectedisNew">
+							<button ng-click="updateBook()">Update</button>
+						</span>
+						<span ng-show="data.selectedisNew">
+							<button ng-click="updateBook()">Add</button>
+						</span>
 					</div>
 				</div>
 			</section>
