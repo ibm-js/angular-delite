@@ -1,0 +1,23 @@
+{
+  "name": "angular-delite",
+  "version": "0.1.0-dev",
+  "dependencies": {
+    "dojo": ">=1.9.1",
+    "requirejs": "2.1.x",
+    "requirejs-text": ">=2.0.11",
+    "dcl": "1.1.x",
+    "angular": "~1.2.16",
+    "angular-resource": "~1.2.16"
+  },
+  "devDependencies": {
+    "platform": "Polymer/platform#~0.1.4",
+    "dstore": ">=0.1.0-dev"
+  },
+  "ignore": [
+    ".jshintrc",
+    ".gitattributes",
+    ".travis.yml",
+    "tests",
+    "CONTRIBUTING.md"
+  ]
+}

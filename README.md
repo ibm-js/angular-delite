@@ -4,6 +4,8 @@
 
 ### Widget
 
+
+
 Any regular deliteful widget can be wrapped into an angular module and used as
 a directive. 
 
@@ -13,21 +15,22 @@ define([
 	"angular-delite/ngWidget",
 	"deliteful/myWidget",
 	], function (ngWidget, myWidget) {
-		ngWidget("myWidget", myWidget, ["name", ...]);
+		ngWidget("myWidget", myWidget);
 	})
 ```
 this creates a angular module named `ngMyWidget`.
+
 2. Invoke the module inside your app as a dependency.
 ```js
 define([ "ngMyWidget" ], function (ngMyWidget) {
 		angular.module("app", ["ngMyWidget"]);
 	})
 ```
+
 3. Use the directive
 ```js
 <ng-my-widget name="Bob"></ng-my-widget>
 ```
-
 
 ### Store
 
