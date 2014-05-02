@@ -24,10 +24,10 @@ define(["dojo/_base/declare"], function (declare) {
 
 				var _store = declare(store, {
 					get    : promise(),
-					save   : promise(),
-					add    : promise(),
-					put    : promise(),
-					remove : promise()
+					//save   : promise(),
+					//add    : promise(),
+					//put    : promise(),
+					//remove : promise()
 				});
 				
 				return _store;

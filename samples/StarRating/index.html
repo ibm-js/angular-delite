@@ -104,6 +104,19 @@ var app = angular.module("app", [ "StarRating" ]); </code></pre>
 				</p>
 			</section>
 		</div>
+			<div ng-controller="starrater" id="ctrl">
+				<form>
+					In outer scope, two variables: 
+					<label>Value</label> <button ng-click="sirius.value = sirius.value - 1">-</button>
+					<label>Value</label> <button ng-click="sirius.value = sirius.value + 1">+</button>
+				</form>
+					<pre><code>
+					<!--<button ng-click="sirius.value = sirius.value + 1">+</button>-->
+					</code></pre>
+				<section>
+					<ng-star-rating max="6" value="1" id="sirius"></ng-star-rating> 
+				</section>
+		</div>
 	</section>
 	</body>
 </html>

@@ -4,7 +4,6 @@ require([
 		"delite/register",
 		"angular-delite/samples/StarRating/ngStarRating",
 		"angular/angular",
-		"angular/resource",
 		"dojo/domReady!"
 		], function(dcl, has, register, ngStarRating){
 
