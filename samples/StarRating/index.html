@@ -26,8 +26,10 @@
 					], function(){});
 				</script>
 		<style>
-			.value {color:tomato;}
-			.max {color:yellowgreen;}
+			.value {font-weight: bold; color:tomato;}
+			.max {font-weight: bold; color:yellowgreen;}
+			.sirius {font-weight: bold; color: #2980b9;}
+			body {padding: 5em;}
 
 		</style>
 		
@@ -67,7 +69,7 @@ var app = angular.module("app", [ "StarRating" ]); </code></pre>
 			<h2>Scoping</h2>
 			<div ng-controller="starrater" id="ctrl">
 				<form>
-					In outer scope, two variables: 
+					In parent scope, two variables: 
 					<label><span class="value">value</span> <input type="number" ng-model="value"></label>
 					<label><span class="max">max</span>   <input type="number" ng-model="max"></label>
 				</form>
@@ -84,9 +86,8 @@ var app = angular.module("app", [ "StarRating" ]); </code></pre>
 				</section>
 
 				<section>
-					<h3> Linking `value` to outer scope, the rest of the widget scope is isolated</h3>
+					<h3> Linking `value` to parent scope, the rest of the widget scope is isolated</h3>
 					<p>
-
 					<pre><code> ngWidget("StarRating1", StarRating, {<span class="value">value</span>: "="}); </code></pre>
 					<pre><code> &lt;ng-star-rating1 max="6" value="<span class="value">value</span>"&gt;&lt;/ng-star-rating1&gt; </code></pre>
 					<ng-star-rating1 max="6" value="value"></ng-star-rating1>
@@ -95,7 +96,7 @@ var app = angular.module("app", [ "StarRating" ]); </code></pre>
 
 			<section>
 				<h3>
-					Linking `value` and `max` to outer scope
+					Linking `value` and `max` to parent scope
 				</h3>
 				<p>
 					<pre><code> ngWidget("StarRating2", StarRating, {<span class="value">value</span>:"=", <span class="max">max</span>: "="}); </code></pre>
@@ -104,19 +105,19 @@ var app = angular.module("app", [ "StarRating" ]); </code></pre>
 				</p>
 			</section>
 		</div>
-			<div ng-controller="starrater" id="ctrl">
-				<form>
-					In outer scope, two variables: 
-					<label>Value</label> <button ng-click="sirius.value = sirius.value - 1">-</button>
-					<label>Value</label> <button ng-click="sirius.value = sirius.value + 1">+</button>
-				</form>
-					<pre><code>
-					<!--<button ng-click="sirius.value = sirius.value + 1">+</button>-->
-					</code></pre>
-				<section>
-					<ng-star-rating max="6" value="1" id="sirius"></ng-star-rating> 
-				</section>
-		</div>
-	</section>
+		<div ng-controller="starrater" id="ctrl">
+			<pre><code> &lt;ng-star-rating max="6" value="1" id="<span class="sirius">sirius</span>"&gt;&lt;/ng-star-rating&gt; 
+ &lt;button ng-click="<span class="sirius">sirius</span>.value = <span class="sirius">sirius</span>.value + 1"&gt;value++&lt;/button&gt; </code></pre>
+		<section>
+			<h3>
+				Linking the whole widget to the parent scope
+			</h3>
+			<div>
+			</div>
+			<ng-star-rating max="6" value="1" id="sirius"></ng-star-rating> 
+			<button ng-click="sirius.value = sirius.value + 1">value++</button>
+		</section>
+	</div>
+</section>
 	</body>
 </html>
