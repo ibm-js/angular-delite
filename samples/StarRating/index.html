@@ -81,7 +81,7 @@ var app = angular.module("app", [ "StarRating" ]); </code></pre>
 						<pre><code> ngWidget("StarRating", StarRating); 
 // same as: ngWidget("StarRating", StarRating, {value: "@", max: "@", ... })</code></pre>
 					<pre><code> &lt;ng-star-rating max="6" value="3"&gt;&lt;/ng-star-rating&gt; </code></pre>
-<ng-star-rating max="6" value="3"></ng-star-rating> 
+<ng-star-rating id="lol" max="6" value="3"></ng-star-rating> 
 					</p>
 				</section>
 
@@ -106,18 +106,14 @@ var app = angular.module("app", [ "StarRating" ]); </code></pre>
 			</section>
 		</div>
 		<div ng-controller="starrater" id="ctrl">
-			<pre><code> &lt;ng-star-rating max="6" value="1" id="<span class="sirius">sirius</span>"&gt;&lt;/ng-star-rating&gt; 
+			<section>
+				<h3> Linking the whole widget to the parent scope </h3>
+				<pre><code> &lt;ng-star-rating max="6" value="1" id="<span class="sirius">sirius</span>"&gt;&lt;/ng-star-rating&gt; 
  &lt;button ng-click="<span class="sirius">sirius</span>.value = <span class="sirius">sirius</span>.value + 1"&gt;value++&lt;/button&gt; </code></pre>
-		<section>
-			<h3>
-				Linking the whole widget to the parent scope
-			</h3>
-			<div>
-			</div>
-			<ng-star-rating max="6" value="1" id="sirius"></ng-star-rating> 
-			<button ng-click="sirius.value = sirius.value + 1">value++</button>
-		</section>
-	</div>
-</section>
-	</body>
+				<ng-star-rating max="6" value="1" id="sirius"></ng-star-rating> 
+				<button ng-click="sirius.value = (sirius.value - 0)+ 1">value++</button>
+			</section>
+		</div>
+	</section>
+</body>
 </html>

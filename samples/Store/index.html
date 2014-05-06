@@ -1,0 +1,63 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
+		<meta name="apple-mobile-web-app-capable" content="yes"/>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700|Open+Sans' rel='stylesheet' type='text/css'>
+		<title>StarRating</title>
+		<script data-main="../../../" src="/requirejs/require.js">
+			<script type="text/javascript">
+				require.config({
+					packages: [
+				{name: 'dcl'       , location: 'dcl'       } ,
+				{name: 'dojo'      , location: 'dojo'      } ,
+				{name: 'delite'    , location: 'delite'    } ,
+				{name: 'deliteful' , location: 'deliteful' } ,
+				{name: 'dojox'     , location: 'dojox'     } ,
+				{name: 'doh'       , location: 'util/doh'  }
+				],
+				locale: "en-us",
+				});
+			</script>
+			<script>
+				require([
+						"angular-delite/samples/Store/app",
+						"dojo/domReady!"
+						], function(){});
+			</script>
+			<script>
+				require([
+						//"deliteful/list/List",
+						"dojo/domReady!"
+						], function(){});
+			</script>
+			<style>
+				.book-key {font-weight:bold;}
+				body, table {
+					font-family: 'Open Sans', sans-serif;
+					font-size: 12px;
+				}
+				pre {
+					font-size: 10px;
+				}
+				body {
+					background:#FAFAFA
+				}
+
+			</style>
+
+		</head>
+		<body id="body-id" class="container">
+
+			<section id="app">
+
+				<div ng-controller="BookListCtrl" class="view-select">
+					<!--<pre>{{data.books}}</pre>-->
+					<ng-list  id="mylist"></ng-list>
+					<pre>mylist.selectedItem {{mylist.selectedItem}}</pre>
+					<pre>selectedItem {{selectedItem}}</pre>
+				</div> <!-- BookListCtrl ctrl -->
+			</section> <!-- /app -->
+		</body>
+	</html>
