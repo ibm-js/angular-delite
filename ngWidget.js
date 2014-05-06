@@ -52,8 +52,9 @@ define([], function () {
 	 */
 	var getDefaultProps = function (Constructor) {
 		// getting all the props
-		var instance = new Constructor();
-		var all = Object.getPrototypeOf(instance)._getProps();
+		//var all = Object.getPrototypeOf(Constructor)._getProps();
+		var Spec = Constructor._ctor.prototype;
+		var all = Spec._getProps();
 		// TODO: not sure whether this actually gets all the properties 
 		// eg: when a widget B inherits from A, you probaly want A's properties
 		// as well, but i'm not sure this includes them.
@@ -61,14 +62,15 @@ define([], function () {
 		var unwanted = all.filter(function (prop) {
 			// TODO: we might also want to remove very nested object
 			// not sure though how to detect theses
-			var p = instance[prop];
-			var c1 = typeof p === "function"; // remove functions
-			return c1;
+			var p = Spec[prop];
+			var cond = [
+				typeof p === "function"   // remove functions
+			];
+			return cond.every(function (c) {return c === true;});
 		});
 		var otherUnwanted = ["baseClass", "focused", "widgetId", "invalidProperties", "invalidRendering"];
 		var excluded = unwanted.concat(otherUnwanted);
 
-		instance.destroy(); 
 		// TODO: not sure whether this actually restores memory to its initial state
 		// It might be better to just pass in the real instance of the widget, not only the 
 		// constructor
@@ -149,7 +151,7 @@ define([], function () {
 			scope.widget.watch(p, function () {
 				if (scope.widget[p] !== scope[p]) {
 					(function (scope, p) {
-						setTimeout(function () { // TODO: 
+						setTimeout(function () {
 							scope.$apply(function(){
 								if (p in getAttrs(attrs)) {
 									scope[p] = scope.widget[p];

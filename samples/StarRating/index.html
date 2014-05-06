@@ -42,7 +42,6 @@
 			<h2>Basic usage</h2>
 
 			<p>
-	
 <pre><code> // Declare the widget as a standalone angular module 
 define([
 	"angular-delite/ngWidget",
@@ -53,13 +52,10 @@ define([
 </code></pre>
 			</p>
 			<p>
-			
 <pre><code> // Invoke it inside your main angular module like any other module
 var app = angular.module("app", [ "StarRating" ]); </code></pre>
 			</p>
 			<p>
-
-				
 <pre><code> &lt;!-- Use it like any 'E' directive --&gt;
 &lt;ng-star-rating max="6" value="3"&gt;&lt;/ng-star-rating&gt; </code></pre>
 			</p>
@@ -81,7 +77,7 @@ var app = angular.module("app", [ "StarRating" ]); </code></pre>
 						<pre><code> ngWidget("StarRating", StarRating); 
 // same as: ngWidget("StarRating", StarRating, {value: "@", max: "@", ... })</code></pre>
 					<pre><code> &lt;ng-star-rating max="6" value="3"&gt;&lt;/ng-star-rating&gt; </code></pre>
-<ng-star-rating id="lol" max="6" value="3"></ng-star-rating> 
+					<ng-star-rating id="lol" max="6" value="3"></ng-star-rating> 
 					</p>
 				</section>
 
@@ -90,7 +86,7 @@ var app = angular.module("app", [ "StarRating" ]); </code></pre>
 					<p>
 					<pre><code> ngWidget("StarRating1", StarRating, {<span class="value">value</span>: "="}); </code></pre>
 					<pre><code> &lt;ng-star-rating1 max="6" value="<span class="value">value</span>"&gt;&lt;/ng-star-rating1&gt; </code></pre>
-					<ng-star-rating1 max="6" value="value"></ng-star-rating1>
+					<ng-star-rating1 max="6" value="value"></ng-star-rating1> 
 				</p>
 			</section>
 
