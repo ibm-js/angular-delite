@@ -12,12 +12,6 @@ define([], function () {
 		return obj1;
 	};
 
-	var getOutedScope = function (isolatedScope) {
-		var isOuted = function (p) { return isolatedScope[p] === "="; }
-		return Object.keys(isolatedScope)
-			.filter(isOuted);
-	}
-
 	var diffArray = function (all, excluded) {
 		var isIncluded = function (property) {
 			return (excluded.indexOf(property) === -1);
@@ -26,26 +20,7 @@ define([], function () {
 	};
 
 	/**
-	 * extracts all the propreties of the widget
-	 */
-	var getDefaultProps = function (Constructor) {
-		// getting all the props
-		var instance = new Constructor();
-		var all = Object.getPrototypeOf(instance)._getProps();
-		console.log("props", all);
-		var unwanted = all.filter(function (prop) {
-			var p = instance[prop];
-			return typeof p === "function";
-		});
-		instance.destroy();
-
-		console.log("unwanted", unwanted);
-		// filtering relevant props
-		var excluded = unwanted.concat(["baseClass", "focused", "widgetId", "invalidProperties", "invalidRendering"]);
-		return diffArray(all, excluded);
-	};
-
-	/**
+	 * returns attributes of directive
 	 * takes raw attrs parameter of the directive and
 	 * makes up a clean version out of it with only relevant
 	 * attrs.
@@ -58,6 +33,54 @@ define([], function () {
 		return attr;
 	};
 
+	/**
+	 * returns the id of a widget if any, null otherwise
+	 */
+	var getId = function (attrs) {
+		var allowed = ["id", "data-id", "x-id"];
+		for (var a in attrs) {
+			if (attrs.hasOwnProperty(a)
+					&& allowed.indexOf(a) > -1) {
+						return attrs[a];
+					}
+		}
+		return null;
+	};
+
+	/**
+	 * extracts all the propreties of the widget
+	 */
+	var getDefaultProps = function (Constructor) {
+		// getting all the props
+		var instance = new Constructor();
+		var all = Object.getPrototypeOf(instance)._getProps();
+		// TODO: not sure whether this actually gets all the properties 
+		// eg: when a widget B inherits from A, you probaly want A's properties
+		// as well, but i'm not sure this includes them.
+
+		var unwanted = all.filter(function (prop) {
+			// TODO: we might also want to remove very nested object
+			// not sure though how to detect theses
+			var p = instance[prop];
+			var c1 = typeof p === "function"; // remove functions
+			return c1;
+		});
+		var otherUnwanted = ["baseClass", "focused", "widgetId", "invalidProperties", "invalidRendering"];
+		var excluded = unwanted.concat(otherUnwanted);
+
+		instance.destroy(); 
+		// TODO: not sure whether this actually restores memory to its initial state
+		// It might be better to just pass in the real instance of the widget, not only the 
+		// constructor
+
+		// filtering relevant props
+		return diffArray(all, excluded);
+	};
+
+	/**
+	 * create the default isolated scope that compiles
+	 * all the attributes as string values.
+	 */
 	var defaultScope = function (props) {
 		var s = {};
 		props.forEach(function (p) {
@@ -66,6 +89,9 @@ define([], function () {
 		return s;
 	};
 
+	/**
+	 * creates the isolated scope of the directive
+	 */
 	var setIsolatedScope = function (Constructor, overwrite) {
 		var props = getDefaultProps(Constructor);
 		var s = defaultScope(props);
@@ -75,120 +101,118 @@ define([], function () {
 		return s;
 	};
 
-	var setTypedValue = function (instance, property, value) {
+	var setTypedValue = function (instance, property, value) { // TODO: should be useless now, remove it when sure
 		// TODO: this should really be made more robust
 		// also see if there is a way to use https://github.com/ibm-js/delite/blob/master/CustomElement.js#L102
 		switch (typeof instance[property]) {
 			case "number":
-				return value - 0;
+				return value - 0; // NOTE: this is just to make sure the output is a number
 			default:
 				return value;
 		}
 	};
 
-	var initScope = function (attrs, scope, isolatedScope) {
-
-		
-	};
-	
-
-	var setWatchers = function (scope, props, attrs) {
-		//var excluded = ["selectedItems", "renderItems", "allowRemap", "copyAllItemProps", "scrollDirection", "scrollableNode", "labelAttr", "iconclassAttr", "righttextAttr", "righticonclassAttr", "categoryAttr", "categoryFunc"];
-			qqq = scope;
-		qa = getAttrs(attrs);
-
-		var excluded = [];
-		var all = Object.keys(props);
-		var following = getOutedScope(props);
-
-		// initialise the widget with attributes values
-		console.log("all", all); 
-		all.forEach(function (p) {
+	/**
+	 * initialize the widget with attributes values
+	 */
+	var initProps = function (scope, props, attrs) {
+		Object.keys(props).forEach(function (p) {
 			if (! isUndefined(attrs[p])){
 				scope.widget[p] = scope[p];
-				scope[p] = scope.widget[p];
 			}
 		});
-		console.log("following", following);
-		following.forEach(function (p) {
-			//if (p === "selectedItem") {
-			// if scope property changes, update widget property
+
+	};
+
+	/**
+	 * return props in scope which are shared with parent 
+	 * scope
+	 */
+	var getOutedScope = function (isolatedScope) {
+		var isOuted = function (p) { return isolatedScope[p] === "="; }
+		return Object.keys(isolatedScope).filter(isOuted);
+	};
+
+	/**
+	 * sets watchers on props that are exposed to the parent scope
+	 */
+	var setWatchers = function (scope, props, attrs) {
+		getOutedScope(props).forEach(function (p) {
+			// if scope exposed property changes, update widget property
 			scope.$watch(p, function (newValue) {
 				if (!isUndefined(newValue) && scope.widget[p] !== newValue) {
-						console.log("-> triggered on", p, "\t scope.widget.p", scope.widget[p], "\t scope.p", scope[p], "\t newValue", newValue, "\t\t", (new Date()).getMilliseconds());
-						scope.widget[p] = newValue;
+					scope.widget[p] = newValue;
 				}
 			});
 
-
-			// if widget property changes, update scope property
+			// if widget exposed property changes, update scope property
 			scope.widget.watch(p, function () {
 				if (scope.widget[p] !== scope[p]) {
-					console.log("<- triggered on", p, "\t scope.p", scope[p], "\t scope.widget.p", scope.widget[p]);
 					(function (scope, p) {
-						setTimeout(function () {							
+						setTimeout(function () { // TODO: 
 							scope.$apply(function(){
-								if (p in getAttrs(attrs))
+								if (p in getAttrs(attrs)) {
 									scope[p] = scope.widget[p];
+								}
 							});
 						}, 1);
-						
 					})(scope, p);
-
 				}
 			});
-			//}
 		});
 	};
 
-
-	var getId = function (attrs) {
-		var allowed = ["id", "data-id", "x-id"];
-		for (var a in attrs) {
-			if (attrs.hasOwnProperty(a)
-				&& allowed.indexOf(a) > -1) {
-				return attrs[a];
-			}
-		}
-		return null;
-	};
-
-	return function ngWidget(name, Constructor, overwrite, init, deps) { // TODO: deps should be second argument
-		var directiveName = "ng" + name;
+	/** 
+	 * defines an angular `E` directive that holds the widget.
+	 * The scope is isolated.
+	 * USAGE: 
+	 *		// basic use case
+			angular.module("DeliteWidget", []).directive("deliteWidget", function () {
+				return ngWidget(List);
+			});
+	 */
+	var ngWidget = function (Constructor, overwrite, init) {
 		var isolatedScope = setIsolatedScope(Constructor, overwrite);
-		return angular.module(name, deps ? deps : []).directive(directiveName, function () {
-			return {
-				restrict: "E",
-				scope: isolatedScope,
-				link: function (scope, elem, attrs) {
+		return {
+			restrict: "E",
+			scope: isolatedScope,
+			link: function (scope, elem, rawAttrs) {
 
-					// insert widget in angular directive
-					scope.widget = typeof init === "function" ?
-						init(Constructor) : new Constructor();
+				// create the instance
+				scope.widget = typeof init === "function" ?
+					init(Constructor) : new Constructor();
 
-					elem.append(scope.widget);
+				// insert widget in angular directive
+				elem.append(scope.widget);
 
-					// make widget available in parent scope if `id` was given
-					if (!isUndefined(scope.$parent)) {
-						var id = getId(attrs);
-						if (id !== null) {
-							scope.$parent[id] = scope.widget;
-						}
+				// get relevant attributes
+				var attrs = getAttrs(rawAttrs);
+
+				// make widget available in parent scope if `id` was given
+				if (! isUndefined(scope.$parent)) {
+					var id = getId(attrs);
+					if (id !== null) {
+						scope.$parent[id] = scope.widget;
 					}
-
-					// process attrs values to their correct type
-					//Object.keys(attrs.$attr).forEach(function (a) {
-						//attrs[a] = setTypedValue(scope.widget, a, attrs[a]);
-					//});
-					p = scope;
-					console.log("scope", scope)
-					// bind widget proprieties with directive scope
-					console.log("isolatedScope", isolatedScope);
-
-
-					setWatchers(scope, isolatedScope, attrs);
 				}
-			};
-		});
+
+				// process attrs values to their correct type
+				// TODO: not sure whether this should be kept, especially
+				// since angular users are used to values behaving like strings
+				// and don't expect any kind of preprocessing
+
+				//Object.keys(attrs.$attr).forEach(function (a) {
+					//attrs[a] = setTypedValue(scope.widget, a, attrs[a]);
+				//});
+
+				// initialize the props of the widget with the attribute values
+				initProps(scope, isolatedScope, attrs);
+				// TODO: be more careful with default values
+
+				// bind widget proprieties with directive scope
+				setWatchers(scope, isolatedScope, rawAttrs);
+			}
+		};
 	};
+	return ngWidget;
 });

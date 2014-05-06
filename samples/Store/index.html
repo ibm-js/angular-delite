@@ -51,13 +51,21 @@
 		<body id="body-id" class="container">
 
 			<section id="app">
-
 				<div ng-controller="BookListCtrl" class="view-select">
 					<!--<pre>{{data.books}}</pre>-->
-					<ng-list  id="mylist"></ng-list>
-					<pre>mylist.selectedItem {{mylist.selectedItem}}</pre>
-					<pre>selectedItem {{selectedItem}}</pre>
+					<ng-list selection-mode="single" selected-item="selectedItem"id="mylist"></ng-list>
+					<div ng-show="data.currentBook">
+						<dl>
+							<dt>Title</dt>
+							<dd>{{data.currentBook.title}} </dd>
+							<dt>ISBN</dt>
+							<dd>{{data.currentBook.isbn}} </dd>
+							<!--<dt>Rating</dt>-->
+							<!--<dd>{{data.currentBook.rating}} </dd>-->
+						</dl>
+					</div>
 				</div> <!-- BookListCtrl ctrl -->
+
 			</section> <!-- /app -->
 		</body>
 	</html>
