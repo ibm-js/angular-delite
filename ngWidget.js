@@ -18,6 +18,47 @@ define([], function () {
 		};
 		return all.filter(isIncluded);
 	};
+	camelToDash = function (str) {
+		return str.replace(/([a-z\d])([A-Z])/g, '$1-$2').toLowerCase();
+	};
+	dashToCamel = function (str) {
+		return str.replace(/(-[a-z])/g, '_');
+	};
+
+	/**
+	 * create an instance of the widget, using `init` if defined;
+	 */
+	var createInstance = function (Constructor, init) {
+		var instance = null;
+		switch(typeof init) {
+			case "function": 
+				instance = init(Constructor);
+				if (instance == null) {
+					throw new Error("init() did not return an instance");
+				}
+				break;
+			case "object": 
+				instance = new Constructor(init);
+				break;
+			default:
+				instance = new Constructor();
+		}
+		return instance;
+	};
+	
+	/**
+	 * check whether an attribute is an event attribute
+	 */
+	var isEventAttr = function(a){ 
+		return a.indexOf("on") === 0; 
+	};
+
+	/**
+	 * transforms onClick to onclick
+	 */
+	var formatEventAttr = function(eventAttr) {
+		return eventAttr.toLowerCase();
+	};
 
 	/**
 	 * returns attributes of directive
@@ -26,12 +67,31 @@ define([], function () {
 	 * attrs.
 	 */
 	var getAttrs = function(rawAttrs){
-		var attr = {};
+		var attrs = {};
 		Object.keys(rawAttrs.$attr).forEach(function(p){
-			attr[p] = rawAttrs[p];
+			if (isEventAttr(p)) {
+				attrs[formatEventAttr(p)] = new Function(rawAttrs[p])
+			} else {
+				attrs[p] = rawAttrs[p];
+			}
 		});
-		return attr;
+
+		return attrs;
 	};
+
+	/**
+	 * return a hash similar to attrs but containing only
+	 * attributes prefixed corresponding to an event
+	 */
+	var getEventAttrs = function (attrs) {
+		eventAttrs = {};
+		Object.keys(attrs).filter(isEventAttr).forEach(function(a){
+			eventAttrs[a] = attrs[a];
+		});
+		return eventAttrs;
+	};
+
+
 
 	/**
 	 * returns the id of a widget if any, null otherwise
@@ -61,7 +121,7 @@ define([], function () {
 
 		var unwanted = all.filter(function (prop) {
 			// TODO: we might also want to remove very nested object
-			// not sure though how to detect theses
+			// not sure though how to detect theses quickly
 			var p = Spec[prop];
 			var cond = [
 				typeof p === "function"   // remove functions
@@ -93,6 +153,7 @@ define([], function () {
 
 	/**
 	 * creates the isolated scope of the directive
+	 *
 	 */
 	var setIsolatedScope = function (Constructor, overwrite) {
 		var props = getDefaultProps(Constructor);
@@ -118,17 +179,40 @@ define([], function () {
 	 * initialize the widget with attributes values
 	 */
 	var initProps = function (scope, props, attrs) {
-		Object.keys(props).forEach(function (p) {
+		Object.keys(props).forEach(function (p) { 
+			// TODO: this block should not be handeling event attributes (onclick, onchange, etc.)
+			// we should make sure they are filtered
 			if (! isUndefined(attrs[p])){
 				scope.widget[p] = scope[p];
+			}
+		});	
+		
+
+		Object.keys(getEventAttrs(attrs)).forEach(function(p){
+			var fp = formatEventAttr(p);
+			if (! isUndefined(scope.widget[fp])) {
+				scope.widget[fp] = eventAttrs[p];
 			}
 		});
 
 	};
 
+
 	/**
-	 * return props in scope which are shared with parent 
-	 * scope
+	 * inserts widget into parent scope
+	 * requires `id` to be correctly defined as a string
+	 */
+	var exposeToParentScope = function (scope, widget, id) {
+		if (! isUndefined(scope.$parent)) {
+			scope.$parent[id] = widget;
+		}
+	};
+
+
+	/**
+	 * return props in scope which are exposed to the parent scope
+	 * @param {Object} isolatedScope The isolated scope hash
+	 * @return {Array} a list of all exposed proprieties.
 	 */
 	var getOutedScope = function (isolatedScope) {
 		var isOuted = function (p) { return isolatedScope[p] === "="; }
@@ -137,6 +221,9 @@ define([], function () {
 
 	/**
 	 * sets watchers on props that are exposed to the parent scope
+	 * @param {Scope} scope The scope of the directive
+	 * @param {Object} props The isolated scope hash
+	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs
 	 */
 	var setWatchers = function (scope, props, attrs) {
 		getOutedScope(props).forEach(function (p) {
@@ -153,7 +240,7 @@ define([], function () {
 					(function (scope, p) {
 						setTimeout(function () {
 							scope.$apply(function(){
-								if (p in getAttrs(attrs)) {
+								if (p in attrs) {
 									scope[p] = scope.widget[p];
 								}
 							});
@@ -167,13 +254,34 @@ define([], function () {
 	/** 
 	 * defines an angular `E` directive that holds the widget.
 	 * The scope is isolated.
-	 * USAGE: 
-	 *		// basic use case
-			angular.module("DeliteWidget", []).directive("deliteWidget", function () {
-				return ngWidget(List);
-			});
+	 * @param {module:deliteful/*} Constructor 
+	 *
+	 * @example <caption>basic use case</caption>
+	 *  	angular.module("DeliteWidget", []).directive("deliteWidget", function () {
+	 *  		return ngWidget(List);
+	 *  	});
+	 *
+	 * @example <caption>Expose proprieties to parent scope</caption>
+	 *  	angular.module("DeliteWidget", []).directive("deliteWidget", function () {
+	 *  		return ngWidget(List, {selectedMode: '='});
+	 *  	});
+	 *
+	 * @example <caption>Initialize a widget</caption>
+	 *  	angular.module("DeliteWidget", []).directive("deliteWidget", function () {
+	 *  		return ngWidget(List, {}, {selectedMode: "Single"});
+	 *  	});
+	 *
+	 * @example <caption>Initialize a widget (other syntax)</caption>
+	 *  	angular.module("DeliteWidget", []).directive("deliteWidget", function () {
+	 *  		return ngWidget(List, {}, function(Constructor){
+	 *				var myList = new Constructor();
+	 *				myList.selectedMode = "Single";
+	 *				return myList;
+	 *  		});
+	 *  	});
+	 *
 	 */
-	var ngWidget = function (Constructor, overwrite, init) {
+	var ngWidget = function (/*Widget*/ Constructor, /*Object*/ overwrite, /*Function || Object*/ init) {
 		var isolatedScope = setIsolatedScope(Constructor, overwrite);
 		return {
 			restrict: "E",
@@ -181,22 +289,19 @@ define([], function () {
 			link: function (scope, elem, rawAttrs) {
 
 				// create the instance
-				scope.widget = typeof init === "function" ?
-					init(Constructor) : new Constructor();
+				scope.widget = createInstance(Constructor, init);
 
 				// insert widget in angular directive
 				elem.append(scope.widget);
 
 				// get relevant attributes
-				var attrs = getAttrs(rawAttrs);
+				// NOTE: rawAttrs hash contains many keys which are not actual attributes
+				// therefore we make attrs to get rid of them.
+				var attrs = getAttrs(rawAttrs); 
 
 				// make widget available in parent scope if `id` was given
-				if (! isUndefined(scope.$parent)) {
-					var id = getId(attrs);
-					if (id !== null) {
-						scope.$parent[id] = scope.widget;
-					}
-				}
+				var id = getId(attrs);
+				if (id !== null) { exposeToParentScope(scope, scope.widget, id); }
 
 				// process attrs values to their correct type
 				// TODO: not sure whether this should be kept, especially
@@ -213,6 +318,7 @@ define([], function () {
 
 				// bind widget proprieties with directive scope
 				setWatchers(scope, isolatedScope, rawAttrs);
+
 			}
 		};
 	};

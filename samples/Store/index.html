@@ -44,6 +44,9 @@
 				body {
 					background:#FAFAFA
 				}
+				.d-list-item {
+					margin: 100px 0;
+				}
 
 			</style>
 
@@ -53,7 +56,7 @@
 			<section id="app">
 				<div ng-controller="BookListCtrl" class="view-select">
 					<!--<pre>{{data.books}}</pre>-->
-					<ng-list selection-mode="single" selected-item="selectedItem"id="mylist"></ng-list>
+					<ng-list on-change="console.log('debilit')" selection-mode="single" selected-item="selectedItem"id="mylist"></ng-list>
 					<div ng-show="data.currentBook">
 						<dl>
 							<dt>Title</dt>

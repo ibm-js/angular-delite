@@ -11,7 +11,7 @@ require([
 		"dstore/Observable",
 		"angular/angular",
 		"dojo/domReady!"
-		], function(dcl, has, declare, register, ngRest, ngWidget, List ){
+		], function(dcl, has, declare, register, ngRest, ngWidget, List){
 
 			angular.module("Model", ["ngRest"])
 				.factory("BookList", function (Rest) {
@@ -23,6 +23,8 @@ require([
 					var list = new Constructor();
 
 					list.store = BookList;
+
+					_list = list;
 					list.itemToRenderItem = function (item) {
 						return {
 							label     : item.title,
