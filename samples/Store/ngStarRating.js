@@ -2,6 +2,7 @@ define([
 	"angular-delite/ngWidget",
 	"deliteful/StarRating",
 	], function (ngWidget, StarRating) {
-		ngWidget("StarRating", StarRating);
-		ngWidget("StarRatingEditable", StarRating, {value: '='});
+		angular.module("StarRating", []).directive("ngStarRating", function(){
+			return ngWidget(StarRating, {value: "="});
+		});
     });

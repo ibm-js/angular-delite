@@ -7,6 +7,7 @@ require([
 		"angular-delite/samples/Store/ngRest",
 		"angular-delite/ngWidget",
 		"deliteful/list/List",
+		"angular-delite/samples/Store/ngStarRating",
 		"dstore/Observable",
 		"angular/angular",
 		"dojo/domReady!"
@@ -34,7 +35,7 @@ require([
 				});
 			});
 
-			var app = angular.module("app", [ "Model", "List"]);
+			var app = angular.module("app", [ "Model", "List", "StarRating"]);
 			app.controller("BookListCtrl", function ($scope, BookList) {
 					$scope.data = {};
 					BookList.get("").then(function (books) {

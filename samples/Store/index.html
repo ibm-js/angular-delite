@@ -24,7 +24,7 @@
 			body {
 				font-family: 'Open Sans', sans-serif;
 				font-size: 12px;
-				background:#FAFAFA;
+				background: #FAFAFA;
 			}
 		</style>
 
@@ -32,18 +32,19 @@
 		<body class="container">
 			<section id="app">
 				<div ng-controller="BookListCtrl" class="view-select">
-					<div>
-						<button ng-click="mylist.saylove('dat')">sayHi</button>
-					</div>
-					<ng-list selection-mode="multiple" selected-item="selectedItem"  data-id="mylist"></ng-list>
+					<ng-list selection-mode="single" selected-item="selectedItem" data-id="mylist"></ng-list>
 					<div ng-show="data.currentBook">
 						<dl>
 							<dt>Title</dt>
 							<dd>{{data.currentBook.title}} </dd>
+
 							<dt>ISBN</dt>
 							<dd>{{data.currentBook.isbn}} </dd>
-							<!--<dt>Rating</dt>-->
-							<!--<dd>{{data.currentBook.rating}} </dd>-->
+
+							<dt>Rating</dt>
+							<dd>
+								<ng-star-rating max="5" value="data.currentBook.rating" read-only="true"></ng-star-rating>
+							</dd>
 						</dl>
 					</div>
 				</div> <!-- BookListCtrl ctrl -->
