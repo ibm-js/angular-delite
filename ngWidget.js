@@ -84,6 +84,8 @@ define([], function () {
 	/**
 	 * return a hash similar to attrs but containing only
 	 * attributes prefixed corresponding to an event
+	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs.
+	 * @return {Object} a hash of (eventAttributeName, eventAttributeValue) pairs 
 	 */
 	var getEventAttrs = function (attrs) {
 		eventAttrs = {};
