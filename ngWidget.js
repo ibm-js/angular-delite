@@ -115,7 +115,7 @@ define([], function () {
 	};
 
 	/**
-	 * extracts all the propreties of the widget
+	 * extracts all the properties of the widget
 	 * @description gets all the properties from the constructor then filters them using theses conditions
 	 *	1. property is not a function
 	 *	2. property is not one of ["baseClass", "focused", "widgetId", "invalidProperties" and "invalidRendering"]
@@ -219,7 +219,7 @@ define([], function () {
 	/**
 	 * return props in scope which are exposed to the parent scope
 	 * @param {Object} isolatedScope The isolated scope hash
-	 * @return {Array} a list of all exposed proprieties.
+	 * @return {Array} a list of all exposed properties.
 	 */
 	var getOutedScope = function (isolatedScope) {
 		var isOuted = function (p) { return isolatedScope[p] === "="; }
@@ -273,7 +273,7 @@ define([], function () {
 	 *  		return ngWidget(List);
 	 *  	});
 	 *
-	 * @example <caption>Expose proprieties to parent scope</caption>
+	 * @example <caption>Expose properties to parent scope</caption>
 	 *  	angular.module("DeliteWidget", []).directive("deliteWidget", function () {
 	 *  		return ngWidget(List, {selectedMode: '='});
 	 *  	});
@@ -333,7 +333,7 @@ define([], function () {
 				initProps(scope, isolatedScope, attrs);
 				// TODO: be more careful with default values
 
-				// bind widget proprieties with directive scope
+				// bind widget exposed properties with directive scope
 				setWatchers(scope, isolatedScope, rawAttrs);
 
 			}
