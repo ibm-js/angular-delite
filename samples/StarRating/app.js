@@ -16,8 +16,8 @@ require([
 			// a controller was added for debugging, not necessary
 			app.controller("starrater", 
 				function ($scope) {
-					$scope.value = 3
-					$scope.max = 6
+					$scope.value = 3;
+					$scope.max = 6;
 				});
 
 			

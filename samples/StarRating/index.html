@@ -42,21 +42,21 @@
 			<h2>Basic usage</h2>
 
 			<p>
-<pre><code> // Declare the widget as a standalone angular module 
+				<pre><code> // Declare the widget as a standalone angular module 
 define([
 	"angular-delite/ngWidget",
 	"deliteful/StarRating",
 	], function (ngWidget, StarRating) {
 		ngWidget("StarRating", StarRating);
-	});
-</code></pre>
+	}); </code></pre>
+
 			</p>
 			<p>
-<pre><code> // Invoke it inside your main angular module like any other module
+				<pre><code> // Invoke it inside your main angular module like any other module
 var app = angular.module("app", [ "StarRating" ]); </code></pre>
 			</p>
 			<p>
-<pre><code> &lt;!-- Use it like any 'E' directive --&gt;
+				<pre><code> &lt;!-- Use it like any 'E' directive --&gt;
 &lt;ng-star-rating max="6" value="3"&gt;&lt;/ng-star-rating&gt; </code></pre>
 			</p>
 
@@ -70,46 +70,44 @@ var app = angular.module("app", [ "StarRating" ]); </code></pre>
 					<label><span class="max">max</span>   <input type="number" ng-model="max"></label>
 				</form>
 				<section>
-					<h3>
-						By default, values are passed as text, widget scope is completely isolated
-					</h3>
+					<h3> By default, values are passed as text, widget scope is completely isolated </h3>
 					<p>
 						<pre><code> ngWidget("StarRating", StarRating); 
 // same as: ngWidget("StarRating", StarRating, {value: "@", max: "@", ... })</code></pre>
-					<pre><code> &lt;ng-star-rating max="6" value="3"&gt;&lt;/ng-star-rating&gt; </code></pre>
-					<ng-star-rating id="lol" max="6" value="3"></ng-star-rating> 
+						<pre><code> &lt;ng-star-rating max="6" value="3"&gt;&lt;/ng-star-rating&gt; </code></pre>
+						<ng-star-rating id="lol" max="6" value="3"></ng-star-rating> 
 					</p>
 				</section>
 
 				<section>
 					<h3> Linking `value` to parent scope, the rest of the widget scope is isolated</h3>
 					<p>
-					<pre><code> ngWidget("StarRating1", StarRating, {<span class="value">value</span>: "="}); </code></pre>
-					<pre><code> &lt;ng-star-rating1 max="6" value="<span class="value">value</span>"&gt;&lt;/ng-star-rating1&gt; </code></pre>
-					<ng-star-rating1 max="6" value="value"></ng-star-rating1> 
-				</p>
-			</section>
+						<pre><code> ngWidget("StarRating1", StarRating, {<span class="value">value</span>: "="}); </code></pre>
+						<pre><code> &lt;ng-star-rating1 max="6" value="<span class="value">value</span>"&gt;&lt;/ng-star-rating1&gt; </code></pre>
+						<ng-star-rating1 max="6" value="value"></ng-star-rating1> 
+					</p>
+				</section>
 
-			<section>
-				<h3>
-					Linking `value` and `max` to parent scope
-				</h3>
-				<p>
-					<pre><code> ngWidget("StarRating2", StarRating, {<span class="value">value</span>:"=", <span class="max">max</span>: "="}); </code></pre>
-					<pre><code> &lt;ng-star-rating2 max="<span class="max">max</span>" value="<span class="value">value</span>"&gt;&lt;/ng-star-rating2&gt;					 </code></pre>
-					<ng-star-rating2 max="max" value="value"></ng-star-rating2>					 
-				</p>
-			</section>
-		</div>
-		<div ng-controller="starrater" id="ctrl">
-			<section>
-				<h3> Linking the whole widget to the parent scope </h3>
-				<pre><code> &lt;ng-star-rating max="6" value="1" id="<span class="sirius">sirius</span>"&gt;&lt;/ng-star-rating&gt; 
+				<section>
+					<h3> Linking `value` and `max` to parent scope </h3>
+					<p>
+						<pre><code> ngWidget("StarRating2", StarRating, {<span class="value">value</span>:"=", <span class="max">max</span>: "="}); </code></pre>
+						<pre><code> &lt;ng-star-rating2 max="<span class="max">max</span>" value="<span class="value">value</span>"&gt;&lt;/ng-star-rating2&gt;					 </code></pre>
+						<ng-star-rating2 max="max" value="value"></ng-star-rating2>					 
+					</p>
+				</section>
+			</div>
+			<div ng-controller="starrater" id="ctrl">
+				<section>
+					<h3> Linking the whole widget to the parent scope </h3>
+					<p>
+						<pre><code> &lt;ng-star-rating max="6" value="1" id="<span class="sirius">sirius</span>"&gt;&lt;/ng-star-rating&gt; 
  &lt;button ng-click="<span class="sirius">sirius</span>.value = <span class="sirius">sirius</span>.value + 1"&gt;value++&lt;/button&gt; </code></pre>
-				<ng-star-rating max="6" value="1" id="sirius"></ng-star-rating> 
-				<button ng-click="sirius.value = (sirius.value - 0)+ 1">value++</button>
-			</section>
-		</div>
-	</section>
-</body>
+						<ng-star-rating max="6" value="1" id="sirius"></ng-star-rating> 
+						<button ng-click="sirius.value = 1*sirius.value + 1">value++</button>
+					</p>
+				</section>
+			</div>
+		</section><!-- #app -->
+	</body>
 </html>

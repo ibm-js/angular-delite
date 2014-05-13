@@ -6,57 +6,36 @@
 		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700|Open+Sans' rel='stylesheet' type='text/css'>
 		<title>StarRating</title>
-		<script data-main="../../../" src="/requirejs/require.js">
-			<script type="text/javascript">
-				require.config({
-					packages: [
-				{name: 'dcl'       , location: 'dcl'       } ,
-				{name: 'dojo'      , location: 'dojo'      } ,
-				{name: 'delite'    , location: 'delite'    } ,
-				{name: 'deliteful' , location: 'deliteful' } ,
-				{name: 'dojox'     , location: 'dojox'     } ,
-				{name: 'doh'       , location: 'util/doh'  }
-				],
-				locale: "en-us",
-				});
-			</script>
-			<script>
-				require([
-						"angular-delite/samples/Store/app",
-						"dojo/domReady!"
-						], function(){});
-			</script>
-			<script>
-				require([
-						//"deliteful/list/List",
-						"dojo/domReady!"
-						], function(){});
-			</script>
-			<style>
-				.book-key {font-weight:bold;}
-				body, table {
-					font-family: 'Open Sans', sans-serif;
-					font-size: 12px;
-				}
-				pre {
-					font-size: 10px;
-				}
-				body {
-					background:#FAFAFA
-				}
-				.d-list-item {
-					margin: 100px 0;
-				}
-
-			</style>
+		<script data-main="../../../" src="/requirejs/require.js"> </script>
+		<script type="text/javascript">
+			require.config({
+				packages: [
+					{name: 'dcl'       , location: 'dcl'       } ,
+					{name: 'dojo'      , location: 'dojo'      } ,
+					{name: 'delite'    , location: 'delite'    } ,
+					{name: 'deliteful' , location: 'deliteful' } ,
+					{name: 'dojox'     , location: 'dojox'     } ,
+					{name: 'doh'       , location: 'util/doh'  } 
+				], locale: "en-us" 
+			});
+			require(["angular-delite/samples/Store/app", "dojo/domReady!"], function(){});
+		</script>
+		<style>
+			body {
+				font-family: 'Open Sans', sans-serif;
+				font-size: 12px;
+				background:#FAFAFA;
+			}
+		</style>
 
 		</head>
-		<body id="body-id" class="container">
-
+		<body class="container">
 			<section id="app">
 				<div ng-controller="BookListCtrl" class="view-select">
-					<!--<pre>{{data.books}}</pre>-->
-					<ng-list on-change="console.log('debilit')" selection-mode="single" selected-item="selectedItem"id="mylist"></ng-list>
+					<div>
+						<button ng-click="mylist.saylove('dat')">sayHi</button>
+					</div>
+					<ng-list selection-mode="multiple" selected-item="selectedItem"  data-id="mylist"></ng-list>
 					<div ng-show="data.currentBook">
 						<dl>
 							<dt>Title</dt>

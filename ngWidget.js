@@ -5,35 +5,33 @@ define([], function () {
 		return typeof value === "undefined";
 	};
 
-	var overwriteObject = function (obj1, obj2) {
+	var ObjectOverwrite = function (obj1, obj2) {
 		Object.keys(obj2).forEach(function (p) {
 			obj1[p] = obj2[p];
 		});
 		return obj1;
 	};
 
-	var diffArray = function (all, excluded) {
+	var ArrayDiff = function (all, excluded) {
 		var isIncluded = function (property) {
 			return (excluded.indexOf(property) === -1);
 		};
 		return all.filter(isIncluded);
 	};
-	camelToDash = function (str) {
-		return str.replace(/([a-z\d])([A-Z])/g, '$1-$2').toLowerCase();
-	};
-	dashToCamel = function (str) {
-		return str.replace(/(-[a-z])/g, '_');
-	};
 
 	/**
-	 * create an instance of the widget, using `init` if defined;
+	 * creates an instance of the widget, using `init` if defined;
+	 *
+	 * @param {module:deliteful/*} Constructor Constructor for a deliteful widget
+	 * @param {Function || Object} init Can be either a function that returns a widget instance or object used to initialize the widget
+	 * @return {module:deliteful/*} a widget instance  
 	 */
 	var createInstance = function (Constructor, init) {
 		var instance = null;
 		switch(typeof init) {
 			case "function": 
 				instance = init(Constructor);
-				if (instance == null) {
+				if (instance === null) {
 					throw new Error("init() did not return an instance");
 				}
 				break;
@@ -47,7 +45,7 @@ define([], function () {
 	};
 	
 	/**
-	 * check whether an attribute is an event attribute
+	 * checks whether an attribute is an event attribute
 	 */
 	var isEventAttr = function(a){ 
 		return a.indexOf("on") === 0; 
@@ -61,16 +59,20 @@ define([], function () {
 	};
 
 	/**
-	 * returns attributes of directive
-	 * takes raw attrs parameter of the directive and
-	 * makes up a clean version out of it with only relevant
-	 * attrs.
+	 * returns the attributes of directive
+	 * @description takes raw attrs parameter of the directive and
+	 * makes up a clean version out of it with only relevant attrs.
+	 * @param {module:deliteful/*} widget The widget instance
+	 * @param {Object} rawAttrs The attributes hash as passed to the link function of the directive
+	 * @return {Object} a hash of (attributeName, attributeValue) pairs
 	 */
-	var getAttrs = function(rawAttrs){
+	var getAttrs = function(widget, rawAttrs){
 		var attrs = {};
 		Object.keys(rawAttrs.$attr).forEach(function(p){
 			if (isEventAttr(p)) {
-				attrs[formatEventAttr(p)] = new Function(rawAttrs[p])
+				attrs[formatEventAttr(p)] = (new Function(rawAttrs[p])).bind(widget);
+				// TODO: the keyword `this` is not handled
+				// also only global functions can be called
 			} else {
 				attrs[p] = rawAttrs[p];
 			}
@@ -92,9 +94,10 @@ define([], function () {
 	};
 
 
-
 	/**
 	 * returns the id of a widget if any, null otherwise
+	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs
+	 * @return {String||Object} the value of id/data-id/x-id attribute or null
 	 */
 	var getId = function (attrs) {
 		var allowed = ["id", "data-id", "x-id"];
@@ -109,39 +112,40 @@ define([], function () {
 
 	/**
 	 * extracts all the propreties of the widget
-	 */
+	 * @description gets all the properties from the constructor then filters them using theses conditions
+	 *	1. property is not a function
+	 *	2. property is not one of ["baseClass", "focused", "widgetId", "invalidProperties" and "invalidRendering"]
+	 * @param {Object} Constructor 
+	 * @return {Array} An array containing the names of the properties of the widget that need to included in the isolated scope
+	 * */
 	var getDefaultProps = function (Constructor) {
 		// getting all the props
-		//var all = Object.getPrototypeOf(Constructor)._getProps();
 		var Spec = Constructor._ctor.prototype;
 		var all = Spec._getProps();
 		// TODO: not sure whether this actually gets all the properties 
 		// eg: when a widget B inherits from A, you probaly want A's properties
 		// as well, but i'm not sure this includes them.
 
-		var unwanted = all.filter(function (prop) {
-			// TODO: we might also want to remove very nested object
-			// not sure though how to detect theses quickly
-			var p = Spec[prop];
-			var cond = [
-				typeof p === "function"   // remove functions
-			];
-			return cond.every(function (c) {return c === true;});
-		});
-		var otherUnwanted = ["baseClass", "focused", "widgetId", "invalidProperties", "invalidRendering"];
-		var excluded = unwanted.concat(otherUnwanted);
+		var excluded = ["baseClass", "focused", "widgetId", "invalidProperties", "invalidRendering"];
+		var isUnwanted = function (prop) {
+			var value = Spec[prop];                     // default value of the property
+			return typeof value === "function";         // is a function
+		};
+		excluded = excluded.concat(all.filter(isUnwanted));
 
 		// TODO: not sure whether this actually restores memory to its initial state
 		// It might be better to just pass in the real instance of the widget, not only the 
 		// constructor
 
 		// filtering relevant props
-		return diffArray(all, excluded);
+		return ArrayDiff(all, excluded);
 	};
 
 	/**
 	 * create the default isolated scope that compiles
 	 * all the attributes as string values.
+	 * @param {Array} props A list of all the properties of a widget instance.
+	 * @return {Object} A hash representing the default isolated scope of the directive.
 	 */
 	var defaultScope = function (props) {
 		var s = {};
@@ -152,14 +156,16 @@ define([], function () {
 	};
 
 	/**
-	 * creates the isolated scope of the directive
-	 *
+	 * creates the isolated scope of the directive.
+	 * @param {module:deliteful/*} Constructor A widget constructor.
+	 * @param {Object} overwrite A hash that redefines part of the isolated scope and overwrites it.
+	 * @return {Object} A hash representing the isolated scope of the directive.
 	 */
 	var setIsolatedScope = function (Constructor, overwrite) {
 		var props = getDefaultProps(Constructor);
 		var s = defaultScope(props);
 		if (typeof overwrite === "object") { // if overwrite defined, overwrite the scope
-			overwriteObject(s, overwrite);
+			ObjectOverwrite(s, overwrite);
 		}
 		return s;
 	};
@@ -176,10 +182,14 @@ define([], function () {
 	};
 
 	/**
-	 * initialize the widget with attributes values
+	 * initialize the widget with attributes values.
+	 * @param {Object} scope The scope of the directive.
+	 * @param {Object} isolatedScope The isolated scope hash.
+	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs.
 	 */
-	var initProps = function (scope, props, attrs) {
-		Object.keys(props).forEach(function (p) { 
+	var initProps = function (scope, isolatedScope, attrs) {
+		console.log("isolatedScope", isolatedScope);
+		Object.keys(isolatedScope).forEach(function (p) { 
 			// TODO: this block should not be handeling event attributes (onclick, onchange, etc.)
 			// we should make sure they are filtered
 			if (! isUndefined(attrs[p])){
@@ -197,17 +207,21 @@ define([], function () {
 
 	};
 
-
 	/**
 	 * inserts widget into parent scope
 	 * requires `id` to be correctly defined as a string
+	 * @param {Object} scope The scope of the directive
+	 * @param {module:deliteful/*} widget The widget instance
+	 * @param {String} id The value of the id attribute
 	 */
 	var exposeToParentScope = function (scope, widget, id) {
 		if (! isUndefined(scope.$parent)) {
+			//if(isUndefined(scope.$parent.widgets)) 
+				//scope.$parent.widgets = {};
+			//scope.$parent.widgets[id] = widget;
 			scope.$parent[id] = widget;
 		}
 	};
-
 
 	/**
 	 * return props in scope which are exposed to the parent scope
@@ -222,29 +236,33 @@ define([], function () {
 	/**
 	 * sets watchers on props that are exposed to the parent scope
 	 * @param {Scope} scope The scope of the directive
-	 * @param {Object} props The isolated scope hash
+	 * @param {Object} isolatedScope The isolated scope hash
 	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs
 	 */
-	var setWatchers = function (scope, props, attrs) {
-		getOutedScope(props).forEach(function (p) {
+	var setWatchers = function (scope, isolatedScope, attrs) {
+		getOutedScope(isolatedScope).forEach(function (p) {
 			// if scope exposed property changes, update widget property
-			scope.$watch(p, function (newValue) {
-				if (!isUndefined(newValue) && scope.widget[p] !== newValue) {
+			scope.$watch(p, function (newValue, oldValue) {
+				if (!isUndefined(newValue) && ! angular.equals(scope.widget[p], newValue)) {
 					scope.widget[p] = newValue;
 				}
 			});
 
 			// if widget exposed property changes, update scope property
-			scope.widget.watch(p, function () {
-				if (scope.widget[p] !== scope[p]) {
+			scope.widget.watch(p, function (name, oldValue, newValue) {
+				if (p in attrs && 
+					! angular.equals(scope.widget[p], scope[p])) {
+						// TODO: remplace angular.equals call. It could be nice to avoir to call 
+						// angular as a global
 					(function (scope, p) {
-						setTimeout(function () {
+						if (scope.$root.$$phase !== "$digest") { 
+							// NOTE: this seems to be the only & dirty way to avoid 
+							// the error 
+							// https://github.com/angular/angular.js/wiki/Anti-Patterns
 							scope.$apply(function(){
-								if (p in attrs) {
-									scope[p] = scope.widget[p];
-								}
+								scope[p] = scope.widget[p];
 							});
-						}, 1);
+						}
 					})(scope, p);
 				}
 			});
@@ -282,6 +300,9 @@ define([], function () {
 	 *
 	 */
 	var ngWidget = function (/*Widget*/ Constructor, /*Object*/ overwrite, /*Function || Object*/ init) {
+		// NOTE: the isolated scope is constituted of all the properties specific to a widget
+		// which are retrieved from the constructor.
+		// By default every property is passed as a string then overwritten through the `overwrite`
 		var isolatedScope = setIsolatedScope(Constructor, overwrite);
 		return {
 			restrict: "E",
@@ -296,8 +317,8 @@ define([], function () {
 
 				// get relevant attributes
 				// NOTE: rawAttrs hash contains many keys which are not actual attributes
-				// therefore we make attrs to get rid of them.
-				var attrs = getAttrs(rawAttrs); 
+				// attrs is a subset of rawAttrs that gets rid of them.
+				var attrs = getAttrs(scope.widget, rawAttrs); 
 
 				// make widget available in parent scope if `id` was given
 				var id = getId(attrs);
