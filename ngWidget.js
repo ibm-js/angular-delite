@@ -1,5 +1,4 @@
 define([], function () {
-
 	// helpers
 	var isUndefined = function (value) {
 		return typeof value === "undefined";
@@ -12,6 +11,16 @@ define([], function () {
 		return obj1;
 	};
 
+	var ObjectFilter = function(input, func){
+		var output = {};
+		Object.keys(input).filter(function(k){
+			if (func(k, input[k])) {
+				output[k] = input[k];
+			}
+		});
+		return output;
+	}
+
 	var ArrayDiff = function (all, excluded) {
 		var isIncluded = function (property) {
 			return (excluded.indexOf(property) === -1);
@@ -23,7 +32,7 @@ define([], function () {
 	 * creates an instance of the widget, using `init` if defined;
 	 *
 	 * @param {module:deliteful/*} Constructor Constructor for a deliteful widget
-	 * @param {Function || Object} init Can be either a function that returns a widget instance or object used to initialize the widget
+	 * @param {Function||Object} init Can be either a function that returns a widget instance or object used to initialize the widget
 	 * @return {module:deliteful/*} a widget instance  
 	 */
 	var createInstance = function (Constructor, init) {
@@ -48,7 +57,7 @@ define([], function () {
 	 * checks whether an attribute is an event attribute
 	 */
 	var isEventAttr = function(a){ 
-		return a.indexOf("on") === 0; 
+		return a.indexOf("on") === 0;  // checks if a starts with `on`
 	};
 
 	/**
@@ -71,8 +80,6 @@ define([], function () {
 		Object.keys(rawAttrs.$attr).forEach(function(p){
 			if (isEventAttr(p)) {
 				attrs[formatEventAttr(p)] = (new Function(rawAttrs[p])).bind(widget);
-				// TODO: the keyword `this` is not handled
-				// also only global functions can be called
 			} else {
 				attrs[p] = rawAttrs[p];
 			}
@@ -88,13 +95,8 @@ define([], function () {
 	 * @return {Object} a hash of (eventAttributeName, eventAttributeValue) pairs 
 	 */
 	var getEventAttrs = function (attrs) {
-		eventAttrs = {};
-		Object.keys(attrs).filter(isEventAttr).forEach(function(a){
-			eventAttrs[a] = attrs[a];
-		});
-		return eventAttrs;
+		return ObjectFilter(attrs, isEventAttr);
 	};
-
 
 	/**
 	 * returns the id of a widget if any, null otherwise
@@ -123,10 +125,7 @@ define([], function () {
 	var getDefaultProps = function (Constructor) {
 		// getting all the props
 		var Spec = Constructor._ctor.prototype;
-		var all = Spec._getProps();
-		// TODO: not sure whether this actually gets all the properties 
-		// eg: when a widget B inherits from A, you probaly want A's properties
-		// as well, but i'm not sure this includes them.
+		var all = Spec._getProps(); // NOTE this gets all the props specific to a widget, even inherited;
 
 		var excluded = ["baseClass", "focused", "widgetId", "invalidProperties", "invalidRendering"];
 		var isUnwanted = function (prop) {
@@ -134,10 +133,6 @@ define([], function () {
 			return typeof value === "function";         // is a function
 		};
 		excluded = excluded.concat(all.filter(isUnwanted));
-
-		// TODO: not sure whether this actually restores memory to its initial state
-		// It might be better to just pass in the real instance of the widget, not only the 
-		// constructor
 
 		// filtering relevant props
 		return ArrayDiff(all, excluded);
@@ -151,9 +146,7 @@ define([], function () {
 	 */
 	var defaultScope = function (props) {
 		var s = {};
-		props.forEach(function (p) {
-			s[p] = "@";
-		});
+		props.forEach(function(p){ s[p] = "@"; });
 		return s;
 	};
 
@@ -172,16 +165,18 @@ define([], function () {
 		return s;
 	};
 
-	var setTypedValue = function (instance, property, value) { // TODO: should be useless now, remove it when sure
-		// TODO: this should really be made more robust
-		// also see if there is a way to use https://github.com/ibm-js/delite/blob/master/CustomElement.js#L102
-		switch (typeof instance[property]) {
-			case "number":
-				return value - 0; // NOTE: this is just to make sure the output is a number
-			default:
-				return value;
-		}
-	};
+	/*
+	 *var setTypedValue = function (instance, property, value) { // TODO: should be useless now, remove it when sure
+	 *    // TODO: this should really be made more robust
+	 *    // also see if there is a way to use https://github.com/ibm-js/delite/blob/master/CustomElement.js#L102
+	 *    switch (typeof instance[property]) {
+	 *        case "number":
+	 *            return value - 0; // NOTE: this is just to make sure the output is a number
+	 *        default:
+	 *            return value;
+	 *    }
+	 *};
+	 */
 
 	/**
 	 * initialize the widget with attributes values.
@@ -190,17 +185,16 @@ define([], function () {
 	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs.
 	 */
 	var initProps = function (scope, isolatedScope, attrs) {
-		console.log("isolatedScope", isolatedScope);
+		// for widget props which are reference as attributes
 		Object.keys(isolatedScope).forEach(function (p) { 
-			// TODO: this block should not be handeling event attributes (onclick, onchange, etc.)
-			// we should make sure they are filtered
 			if (! isUndefined(attrs[p])){
 				scope.widget[p] = scope[p];
 			}
 		});	
-		
 
-		Object.keys(getEventAttrs(attrs)).forEach(function(p){
+		// for event attributes which the widget "knows"
+		var eventAttrs = getEventAttrs(attrs);
+		Object.keys(eventAttrs).forEach(function(p){
 			var fp = formatEventAttr(p);
 			if (! isUndefined(scope.widget[fp])) {
 				scope.widget[fp] = eventAttrs[p];
@@ -218,9 +212,6 @@ define([], function () {
 	 */
 	var exposeToParentScope = function (scope, widget, id) {
 		if (! isUndefined(scope.$parent)) {
-			//if(isUndefined(scope.$parent.widgets)) 
-				//scope.$parent.widgets = {};
-			//scope.$parent.widgets[id] = widget;
 			scope.$parent[id] = widget;
 		}
 	};
@@ -254,12 +245,13 @@ define([], function () {
 			scope.widget.watch(p, function (name, oldValue, newValue) {
 				if (p in attrs && 
 					! angular.equals(scope.widget[p], scope[p])) {
-						// TODO: remplace angular.equals call. It could be nice to avoir to call 
-						// angular as a global
+					// TODO: remplace angular.equals calls. It could be nice to avoid to call 
+					// angular as a global, even tough it WILL be available when ngWidget is called
+					// It doesn't make sense to have it as a dependency neither.
 					(function (scope, p) {
 						if (scope.$root.$$phase !== "$digest") { 
 							// NOTE: this seems to be the only & dirty way to avoid 
-							// the error 
+							// the $digest collision error 
 							// https://github.com/angular/angular.js/wiki/Anti-Patterns
 							scope.$apply(function(){
 								scope[p] = scope.widget[p];
@@ -303,8 +295,8 @@ define([], function () {
 	 */
 	var ngWidget = function (/*Widget*/ Constructor, /*Object*/ overwrite, /*Function || Object*/ init) {
 		// NOTE: the isolated scope is constituted of all the properties specific to a widget
-		// which are retrieved from the constructor.
-		// By default every property is passed as a string then overwritten through the `overwrite`
+		// which are retrieved from the constructor. By default every property is passed as a 
+		// string then overwritten through the `overwrite`
 		var isolatedScope = setIsolatedScope(Constructor, overwrite);
 		return {
 			restrict: "E",
@@ -318,13 +310,15 @@ define([], function () {
 				elem.append(scope.widget);
 
 				// get relevant attributes
+				var attrs = getAttrs(scope.widget, rawAttrs); 
 				// NOTE: rawAttrs hash contains many keys which are not actual attributes
 				// attrs is a subset of rawAttrs that gets rid of them.
-				var attrs = getAttrs(scope.widget, rawAttrs); 
 
 				// make widget available in parent scope if `id` was given
 				var id = getId(attrs);
-				if (id !== null) { exposeToParentScope(scope, scope.widget, id); }
+				if (id !== null) { 
+					exposeToParentScope(scope, scope.widget, id); 
+				}
 
 				// process attrs values to their correct type
 				// TODO: not sure whether this should be kept, especially
