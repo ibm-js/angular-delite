@@ -21,13 +21,9 @@ require([
 				return ngWidget(List, {selectedItem: "=", selectedItems: "="}, function(Constructor){
 					var list = new Constructor();
 					list.store = BookList;
-					list.saylove = function () {
-						console.log("love", this)
-					};
 					list.itemToRenderItem = function (item) {
 						return {
 							label     : item.title,
-							righttext : item.rating,
 							id        : item.id
 						};
 					};
@@ -35,14 +31,11 @@ require([
 				});
 			});
 
-			var app = angular.module("app", [ "Model", "List", "StarRating"]);
+			var app = angular.module("app", ["Model", "List", "StarRating"]);
 			app.controller("BookListCtrl", function ($scope, BookList) {
 					$scope.data = {};
-					BookList.get("").then(function (books) {
-						$scope.data.books = books;
-					});
 					$scope.$watch("selectedItem", function(newValue, oldValue){
-						if (typeof $scope.selectedItem === "object" && $scope.selectedItem !== null) {
+						if ($scope.selectedItem != null) {
 							BookList.get($scope.selectedItem.id).then(function(d){
 								$scope.data.currentBook = d;
 							});
@@ -50,9 +43,6 @@ require([
 							$scope.data.currentBook = null;
 						}
 					});
-					$scope.sayHi = function () {
-						console.log("hi");
-					};
 				});
 
 			// boostrapping my app on a particular DOM element
