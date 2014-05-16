@@ -1,8 +1,7 @@
-define([], function () {
+define(["angular/angular"], function () {
 	// helpers
-	var isUndefined = function (value) {
-		return typeof value === "undefined";
-	};
+	var isUndefined = angular.isUndefined,
+		equals = angular.equals;
 
 	var ObjectOverwrite = function (obj1, obj2) {
 		Object.keys(obj2).forEach(function (p) {
@@ -67,6 +66,25 @@ define([], function () {
 		return eventAttr.toLowerCase();
 	};
 
+	var setTypedValue = function (widget, name, strValue) {
+		// function
+		if (isEventAttr(name)) {
+			return (new Function(strValue)).bind(widget);
+		}
+
+		// number, boolean, object, string 
+		switch (typeof widget[name]) {
+			case "number":
+				return strValue - 0;
+			case "boolean":
+				return strValue !== "false";
+			case "object":
+				return strValue;
+			default: // "string"
+				return strValue;
+		}
+	};
+
 	/**
 	 * returns the attributes of directive
 	 * @description takes raw attrs parameter of the directive and
@@ -75,13 +93,14 @@ define([], function () {
 	 * @param {Object} rawAttrs The attributes hash as passed to the link function of the directive
 	 * @return {Object} a hash of (attributeName, attributeValue) pairs
 	 */
-	var getAttrs = function(widget, rawAttrs){
+	var getAttrs = function (widget, rawAttrs) {
 		var attrs = {};
 		Object.keys(rawAttrs.$attr).forEach(function(p){
-			if (isEventAttr(p)) {
-				attrs[formatEventAttr(p)] = (new Function(rawAttrs[p])).bind(widget);
+			if (isEventAttr(p)) { // if p starts with "on"
+				var fp = formatEventAttr(p); // converts "on-whatever" to "onwathever"
+				attrs[fp] = setTypedValue(widget, p, rawAttrs[p]);;
 			} else {
-				attrs[p] = rawAttrs[p];
+				attrs[p] = setTypedValue(widget, p, rawAttrs[p]);
 			}
 		});
 
@@ -122,7 +141,7 @@ define([], function () {
 	 * @param {Object} Constructor 
 	 * @return {Array} An array containing the names of the properties of the widget that need to included in the isolated scope
 	 * */
-	var getDefaultProps = function (Constructor) {
+	var getProps = function (Constructor) {
 		// getting all the props
 		var Spec = Constructor._ctor.prototype;
 		var all = Spec._getProps(); // NOTE this gets all the props specific to a widget, even inherited;
@@ -157,7 +176,7 @@ define([], function () {
 	 * @return {Object} A hash representing the isolated scope of the directive.
 	 */
 	var setIsolatedScope = function (Constructor, overwrite) {
-		var props = getDefaultProps(Constructor);
+		var props = getProps(Constructor);
 		var s = defaultScope(props);
 		if (typeof overwrite === "object") { // if overwrite defined, overwrite the scope
 			ObjectOverwrite(s, overwrite);
@@ -165,18 +184,6 @@ define([], function () {
 		return s;
 	};
 
-	/*
-	 *var setTypedValue = function (instance, property, value) { // TODO: should be useless now, remove it when sure
-	 *    // TODO: this should really be made more robust
-	 *    // also see if there is a way to use https://github.com/ibm-js/delite/blob/master/CustomElement.js#L102
-	 *    switch (typeof instance[property]) {
-	 *        case "number":
-	 *            return value - 0; // NOTE: this is just to make sure the output is a number
-	 *        default:
-	 *            return value;
-	 *    }
-	 *};
-	 */
 
 	/**
 	 * initialize the widget with attributes values.
@@ -188,12 +195,13 @@ define([], function () {
 		// for widget props which are reference as attributes
 		Object.keys(isolatedScope).forEach(function (p) { 
 			if (! isUndefined(attrs[p])){
-				scope.widget[p] = scope[p];
+				scope.widget[p] = attrs[p];
 			}
 		});	
 
 		// for event attributes which the widget "knows"
 		var eventAttrs = getEventAttrs(attrs);
+		console.log("eventAttrs", eventAttrs);
 		Object.keys(eventAttrs).forEach(function(p){
 			var fp = formatEventAttr(p);
 			if (! isUndefined(scope.widget[fp])) {
@@ -236,7 +244,7 @@ define([], function () {
 		getOutedScope(isolatedScope).forEach(function (p) {
 			// if scope exposed property changes, update widget property
 			scope.$watch(p, function (newValue, oldValue) {
-				if (!isUndefined(newValue) && ! angular.equals(scope.widget[p], newValue)) {
+				if (!isUndefined(newValue) && ! equals(scope.widget[p], newValue)) {
 					scope.widget[p] = newValue;
 				}
 			});
@@ -244,10 +252,7 @@ define([], function () {
 			// if widget exposed property changes, update scope property
 			scope.widget.watch(p, function (name, oldValue, newValue) {
 				if (p in attrs && 
-					! angular.equals(scope.widget[p], scope[p])) {
-					// TODO: remplace angular.equals calls. It could be nice to avoid to call 
-					// angular as a global, even tough it WILL be available when ngWidget is called
-					// It doesn't make sense to have it as a dependency neither.
+					! equals(scope.widget[p], scope[p])) {
 					(function (scope, p) {
 						if (scope.$root.$$phase !== "$digest") { 
 							// NOTE: this seems to be the only & dirty way to avoid 
@@ -319,15 +324,6 @@ define([], function () {
 				if (id !== null) { 
 					exposeToParentScope(scope, scope.widget, id); 
 				}
-
-				// process attrs values to their correct type
-				// TODO: not sure whether this should be kept, especially
-				// since angular users are used to values behaving like strings
-				// and don't expect any kind of preprocessing
-
-				//Object.keys(attrs.$attr).forEach(function (a) {
-					//attrs[a] = setTypedValue(scope.widget, a, attrs[a]);
-				//});
 
 				// initialize the props of the widget with the attribute values
 				initProps(scope, isolatedScope, attrs);
