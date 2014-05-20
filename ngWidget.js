@@ -332,6 +332,8 @@ define(["angular/angular"], function () {
 				// insert widget in angular directive
 				elem.append(scope.widget);
 
+				scope.widget.startup(); // TODO: check if startup is actually necassary
+
 				// get relevant attributes
 				var attrs = getAttrs(scope.widget, isolatedScope, rawAttrs); 
 				// NOTE: rawAttrs hash contains many keys which are not actual attributes
