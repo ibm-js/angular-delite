@@ -93,14 +93,18 @@ define(["angular/angular"], function () {
 	 * @param {Object} rawAttrs The attributes hash as passed to the link function of the directive
 	 * @return {Object} a hash of (attributeName, attributeValue) pairs
 	 */
-	var getAttrs = function (widget, rawAttrs) {
+	var getAttrs = function (widget, isolatedScope, rawAttrs) {
 		var attrs = {};
 		Object.keys(rawAttrs.$attr).forEach(function(p){
 			if (isEventAttr(p)) { // if p starts with "on"
 				var fp = formatEventAttr(p); // converts "on-whatever" to "onwathever"
 				attrs[fp] = setTypedValue(widget, p, rawAttrs[p]);;
 			} else {
-				attrs[p] = setTypedValue(widget, p, rawAttrs[p]);
+				if (isolatedScope[p] === "@") {
+					attrs[p] = setTypedValue(widget, p, rawAttrs[p]);
+				} else {
+					attrs[p] = rawAttrs[p];
+				}
 			}
 		});
 
@@ -194,8 +198,22 @@ define(["angular/angular"], function () {
 	var initProps = function (scope, isolatedScope, attrs) {
 		// for widget props which are reference as attributes
 		Object.keys(isolatedScope).forEach(function (p) { 
-			if (! isUndefined(attrs[p])){
-				scope.widget[p] = attrs[p];
+
+			// if prop in widget has a value, initialise the scope with it
+			if ( ! isUndefined(scope.widget[p]) ){
+				scope[p] = scope.widget[p];
+			}
+
+			// if attrs were initialized, overwrite widget value
+			if ( !isUndefined(attrs[p]) ){
+				switch(isolatedScope[p]) {
+					case "@":
+						scope.widget[p] = attrs[p];
+						break;
+					case "=":
+						scope.widget[p] = scope[p];
+						break;
+				}
 			}
 		});	
 
@@ -315,7 +333,7 @@ define(["angular/angular"], function () {
 				elem.append(scope.widget);
 
 				// get relevant attributes
-				var attrs = getAttrs(scope.widget, rawAttrs); 
+				var attrs = getAttrs(scope.widget, isolatedScope, rawAttrs); 
 				// NOTE: rawAttrs hash contains many keys which are not actual attributes
 				// attrs is a subset of rawAttrs that gets rid of them.
 
