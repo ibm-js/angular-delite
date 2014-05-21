@@ -245,46 +245,39 @@ define(["angular/angular"], function () {
 	};
 
 	/**
-	 * return props in scope which are exposed to the parent scope
-	 * @param {Object} isolatedScope The isolated scope hash
-	 * @return {Array} a list of all exposed properties.
-	 */
-	var getOutedScope = function (isolatedScope) {
-		var isOuted = function (p) { return isolatedScope[p] === "="; }
-		return Object.keys(isolatedScope).filter(isOuted);
-	};
-
-	/**
 	 * sets watchers on props that are exposed to the parent scope
 	 * @param {Scope} scope The scope of the directive
 	 * @param {Object} isolatedScope The isolated scope hash
 	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs
 	 */
 	var setWatchers = function (scope, isolatedScope, attrs) {
-		getOutedScope(isolatedScope).forEach(function (p) {
-			// if scope exposed property changes, update widget property
-			scope.$watch(p, function (newValue, oldValue) {
-				if (!isUndefined(newValue) && ! equals(scope.widget[p], newValue)) {
-					scope.widget[p] = newValue;
-				}
-			});
+		Object.keys(isolatedScope).forEach(function (p) {
+			if (isolatedScope[p] === "=") { // do this only on '=' attrs
 
-			// if widget exposed property changes, update scope property
-			scope.widget.watch(p, function (name, oldValue, newValue) {
-				if (p in attrs && 
-					! equals(scope.widget[p], scope[p])) {
-					(function (scope, p) {
-						if (scope.$root.$$phase !== "$digest") { 
-							// NOTE: this seems to be the only & dirty way to avoid 
-							// the $digest collision error 
-							// https://github.com/angular/angular.js/wiki/Anti-Patterns
-							scope.$apply(function(){
-								scope[p] = scope.widget[p];
-							});
-						}
-					})(scope, p);
-				}
-			});
+				// if scope exposed property changes, update widget property
+				scope.$watch(p, function (newValue, oldValue) {
+					if (!isUndefined(newValue) && ! equals(scope.widget[p], newValue)) {
+						scope.widget[p] = newValue;
+					}
+				});
+
+				// if widget exposed property changes, update scope property
+				scope.widget.watch(p, function (name, oldValue, newValue) {
+					if (p in attrs && 
+						! equals(scope.widget[p], scope[p])) {
+						(function (scope, p) {
+							if (scope.$root.$$phase !== "$digest") { 
+								// NOTE: this seems to be the only & dirty way to avoid 
+								// the $digest collision error 
+								// https://github.com/angular/angular.js/wiki/Anti-Patterns
+								scope.$apply(function(){
+									scope[p] = scope.widget[p];
+								});
+							}
+						})(scope, p);
+					}
+				});
+			}
 		});
 	};
 
