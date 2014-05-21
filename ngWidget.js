@@ -221,7 +221,6 @@ define(["angular/angular"], function () {
 
 		// for event attributes which the widget "knows"
 		var eventAttrs = getEventAttrs(attrs);
-		console.log("eventAttrs", eventAttrs);
 		Object.keys(eventAttrs).forEach(function(p){
 			var fp = formatEventAttr(p);
 			if (! isUndefined(scope.widget[fp])) {
