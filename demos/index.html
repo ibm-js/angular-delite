@@ -1,0 +1,65 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
+		<meta name="apple-mobile-web-app-capable" content="yes"/>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="components/angular-ui/build/angular-ui.min.css" type="text/css" media="all" />
+		<title>StarRating</title>
+		<script data-main="../../../" src="/requirejs/require.js">
+		<script type="text/javascript">
+			require.config({
+				packages: [
+					{name: 'dcl'       , location: 'dcl'       } ,
+					{name: 'dojo'      , location: 'dojo'      } ,
+					{name: 'delite'    , location: 'delite'    } ,
+					{name: 'deliteful' , location: 'deliteful' } ,
+					{name: 'dojox'     , location: 'dojox'     } ,
+					{name: 'doh'       , location: 'util/doh'  }
+				],
+				locale: "en-us",
+			});
+		</script>
+		<script>
+			require([
+					"components/angular/angular.min.js",
+					"components/angular-ui/build/angular-ui.min.js",
+					"app.js",
+					"dojo/domReady!"
+					], function(){});
+				</script>
+		<style>
+			body {padding: 5em;}
+			.frame {
+				width: 100%;
+				height: 100px;
+				border: none;
+			}
+			pre {
+				-moz-tab-size: 4;
+				-o-tab-size:   4;
+				tab-size:      4;
+			}
+
+		</style>
+		
+	</head>
+	<body id="app">
+
+		<h2> Widget ProgressBar </h2>
+		<div ng-controller="MainCtrl"> </div>
+		<iframe class="frame" src="ProgressBar/index.html"></iframe>
+		<demo-code srcs="html.html, app.js" widget="ProgressBar"></demo-code>
+
+		<h2> Widget StarRating </h2>
+		<div ng-controller="MainCtrl"> </div>
+		<iframe class="frame" src="StarRating/index.html"></iframe>
+		<demo-code srcs="html.html, app.js" widget="StarRating"></demo-code>
+
+		<h2> Widget List </h2>
+		<div ng-controller="MainCtrl"> </div>
+		<iframe style="height: 400px" class="frame" src="List/index.html"></iframe>
+		<demo-code srcs="html.html, app.js" widget="List"></demo-code>
+	</body>
+</html>
+

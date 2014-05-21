@@ -1,0 +1,14 @@
+<div ng-controller="MainCtrl">
+	<div>
+		<label>add a new item </label>
+		<input type="text" ng-model="newTitle">
+		<button ng-click="add(newTitle)">add</button>
+	</div>
+	<ng-list id="books" selection-mode="multiple" selected-items="selectedItems"></ng-list> 
+	<div>
+		<p>
+			You've selected {{selectedItems.length}} items
+			<button ng-click="removeSelected()">remove selected</button>
+		</p>
+	</div>
+</div>
