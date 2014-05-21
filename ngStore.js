@@ -19,15 +19,15 @@ define(["dojo/_base/declare"], function (declare) {
 						// TODO: no access is provided to dojo's promise methods
 						// (isRejected, isCancelled, etc.) It may be necessary.
 						return d.promise;
-					}
-				}
+					};
+				};
 
 				var _store = declare(store, {
 					get    : promise(),
-					//save   : promise(),
-					//add    : promise(),
-					//put    : promise(),
-					//remove : promise()
+					save   : promise(),
+					add    : promise(),
+					put    : promise(),
+					remove : promise()
 				});
 				
 				return _store;
