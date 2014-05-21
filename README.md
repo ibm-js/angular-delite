@@ -32,6 +32,7 @@ define([
 <ng-progress-bar value="30"></ng-progress-bar>
 ```
 
+<a id="init"></a>
 ### Initialize the widget
 While attributes can perfectly initialize your widget, you may want do this when your widget instance is created, 
 for some specific widgets that require it.
@@ -110,12 +111,14 @@ This will produce the following scope
 
 #### Accessing the entire widget instance from parent scope
 The deliteful widget can be accessed in the parent scope when an `id` attribute is added in the directive.
+
 ```html
 <div ng-controller="ParentCtrl">
 	<ng-my-widget name="Bob" id="myWidget"></ng-my-widget>
 	This guys name is {{myWidget.name}}
 </div>
 ```
+
 ```js
 function ParentCtrl($scope){
 	$scope.rename = function(){
@@ -123,8 +126,12 @@ function ParentCtrl($scope){
 	}
 }
 ```
+
 You can also use `data-id` or `x-id` instead, as `id` must be unique to an entire page, 
 wherease our variable is unique to the parent scope only.
+
+NB: you can't use this to initialize you widget from the controller, cf. https://github.com/tkrugg/angular-delite/issues/1
+Instead use [this](#init).
 
 ### Store
 
