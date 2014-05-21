@@ -213,6 +213,8 @@ define(["angular/angular"], function () {
 					case "=":
 						scope.widget[p] = scope[p];
 						break;
+						// TODO: case '&' is not supported atm, the reason being
+						// no use cas was found for it in deliteful widgets
 				}
 			}
 		});	
