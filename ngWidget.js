@@ -265,9 +265,9 @@ define(["angular/angular"], function () {
 					if (p in attrs && 
 						! equals(scope.widget[p], scope[p])) {
 						(function (scope, p) {
-							if (scope.$root.$$phase !== "$digest") { 
+							if (! scope.$root.$$phase) { 
 								// NOTE: this seems to be the only & dirty way to avoid 
-								// the $digest collision error 
+								// the view refresh collision error 
 								// https://github.com/angular/angular.js/wiki/Anti-Patterns
 								scope.$apply(function(){
 									scope[p] = scope.widget[p];
