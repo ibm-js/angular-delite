@@ -1,13 +1,13 @@
 require([
+		"angular",
 		"delite/register",
 		"deliteful/ProgressBar",
-		"angular-delite/ngWidget",
-		"angular/angular",
-		], function(register, ProgressBar, ngWidget){
+		"angular-delite/wrappers/widget",
+		], function(angular, register, ProgressBar, wrapper){
 			
 			angular.module("app", [])
 				   .directive("ngProgressBar", function(){
-					   return ngWidget(ProgressBar);
+					   return wrapper(ProgressBar);
 				   })
 
 			// boostrapping my app on a particular DOM element

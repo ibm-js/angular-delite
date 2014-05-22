@@ -1,13 +1,13 @@
 require([
+		"angular",
 		"delite/register",
 		"deliteful/StarRating",
-		"angular-delite/ngWidget",
-		"angular/angular",
-		], function(register, StarRating, ngWidget){
+		"angular-delite/wrappers/widget",
+		], function(angular, register, StarRating, wrapper){
 			
 			angular.module("app", [])
 				   .directive("ngStarRating", function(){
-					   return ngWidget(StarRating, {value: "="},  {value: 3})
+					   return wrapper(StarRating, {value: "="},  {value: 3})
 				   })
 				   .controller("MainCtrl", function($scope){
 						$scope.getOpinion = function(rate){

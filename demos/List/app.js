@@ -8,15 +8,11 @@ require([
 			
 			angular.module("app", ["dstore.rest"])
 					.factory("BookList", function (Rest) {
-						R = Rest;
 						return new Rest({target: "http://localhost:1337/book/"})
-						//return new Rest({data: [{title: "item 1", id: "3"}]})
 					})
 				   .directive("ngList", function(BookList){
 					   return wrapper(List, {selectedItems: "="}, function(Constructor){
 						   var list = new Constructor({store: BookList});
-						   //store = BookList;
-						   //li = list
 						   list.itemToRenderItem = function (item) {
 							   return {
 								   label     : item.title,
@@ -29,13 +25,6 @@ require([
 				   .controller("MainCtrl", function($scope){
 					   $scope.add = function (newTitle) {
 							$scope.books.store.add({title: newTitle});
-					   };
-					   $scope.current = {};
-					   l = $scope.get = function (id) {
-							$scope.books.store.get(25).then(function(e){
-								console.log("callbacked", e);
-								$scope.current = e;
-							});
 					   };
 					   $scope.removeSelected = function(){
 						   $scope.selectedItems.forEach(function(item){
