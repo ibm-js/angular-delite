@@ -185,7 +185,7 @@ You can use it:
 ```js
 define([
 	"angular",
-	"angular-delite/wrappers/Store.js",
+	"angular-delite/wrappers/store.js",
 	"dstore/Memory"
 	], function (angular, wrapper, Memory) {
 		angular.module("myApp", [])
@@ -198,6 +198,3 @@ define([
 			});
 	});
 ```
-
-Any store instance can be wrapped in a regular angular module with `ngStore`.
-

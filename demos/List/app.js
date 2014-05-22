@@ -2,11 +2,11 @@ require([
 		"angular",
 		"delite/register",
 		"deliteful/list/List",
-		"angular-delite/wrappers/Widget",
+		"angular-delite/wrappers/widget",
 		"angular-delite/dstore/Rest",
 		], function(angular, register, List, wrapper){
 			
-			angular.module("app", ["Dstore.Rest"])
+			angular.module("app", ["dstore.rest"])
 					.factory("BookList", function (Rest) {
 						R = Rest;
 						return new Rest({target: "http://localhost:1337/book/"})
