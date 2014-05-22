@@ -2,9 +2,9 @@ require([
 		"angular",
 		"delite/register",
 		"deliteful/list/List",
-		"angular-delite/ngWidget",
-		"angular-delite/ngRest",
-		], function(angular, register, List, ngWidget){
+		"angular-delite/wrappers/Widget",
+		"angular-delite/dstore/Rest",
+		], function(angular, register, List, wrapper){
 			
 			angular.module("app", ["Dstore.Rest"])
 					.factory("BookList", function (Rest) {
@@ -13,7 +13,7 @@ require([
 						//return new Rest({data: [{title: "item 1", id: "3"}]})
 					})
 				   .directive("ngList", function(BookList){
-					   return ngWidget(List, {selectedItems: "="}, function(Constructor){
+					   return wrapper(List, {selectedItems: "="}, function(Constructor){
 						   var list = new Constructor({store: BookList});
 						   //store = BookList;
 						   //li = list
