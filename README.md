@@ -17,13 +17,13 @@ a directive.
 that accepts attributes matching the `deliteful/ProgressBar` widget.
 ```js
 define([
-	"angular/angular",
-	"angular-delite/ngWidget",
+	"angular",
+	"angular-delite/wrappers/widget",
 	"deliteful/ProgressBar"
-	], function (angular, ngWidget, ProgressBar) {
+	], function (angular, wrapper, ProgressBar) {
 		angular.module("myApp", [])
 			.directive("ngProgressBar", function(){
-				return ngWidget(ProgressBar);
+				return wrapper(ProgressBar);
 			});
 	});
 ```
@@ -82,9 +82,9 @@ For example, in the case of `deliteful/ProgressBar`, the isolated scope defined 
 This is done by overwritting the default isolated scope.
 
 ```js
-angular.module("myApp", [])
-	.directive("ngProgressBar", function(){
-		return ngWidget(ProgressBar, {value: "="});
+angular.module("myapp", [])
+	.directive("ngprogressbar", function(){
+		return ngwidget(progressbar, {value: "="});
 	});
 ```
 
@@ -135,13 +135,69 @@ Instead use [this](#init).
 
 ### Store
 
-Any store instance can be wrapped a regular angular module with `ngStore`
+#### Using Rest and Memory
+`angular-delite/dstore/Rest` contains an angular module `"dstore.rest"` with a 
+factory `Rest` that holds the store contructor, and can be called in any controller.
 
 ```js
 define([
-	"angular-delite/ngStore",
-	"dstore/myStore"
-	], function(ngWidget, myStore){
-		ngStore("myStore", myStore);
-	})
+	"angular",
+	"angular-delite/dstore/Rest" // contains an angular module "dstore.rest"
+	], function (angular) {
+		angular.module("myApp", ["dstore.rest"])
+			.controller("MainCtrl", function($scope, Rest){
+
+				var store = new Rest({target: "http://go.get.it"});
+
+				store.get(3).then(function(book){
+					console.log("Found it!", book);
+				}, function(err){
+					console.log("Something went wrong, look!", err);
+				});
+
+			});
+	});
 ```
+
+The memory store can be used the very same way.
+
+```js
+define([
+	"angular",
+	"angular-delite/dstore/Memory" // contains an angular module "dstore.memory"
+	], function (angular) {
+		angular.module("myApp", ["dstore.memory"])
+			.controller("MainCtrl", function($scope, Memory){
+				var store = new Memory();
+				...
+			});
+	});
+```
+
+It is advised to wrap your store instance in a angular factory or other provider, so that you 
+can properly use it from multiple controllers.
+
+#### The wrapper
+Similarly to delite widgets, a wrapper is provided for `dstores/*`. 
+This wrapper comes as a function that returns a specification for a factory.
+You can use it:
+
+```js
+define([
+	"angular",
+	"angular-delite/wrappers/Store.js",
+	"dstore/Memory"
+	], function (angular, wrapper, Memory) {
+		angular.module("myApp", [])
+			.factory("Memory", function(){
+				return wrapper(Memory);
+			})
+			.controller("MainCtrl", function($scope, Memory){
+				var store = new Memory();
+				...
+			});
+	});
+```
+
+Any store instance can be wrapped in a regular angular module with `ngStore`.
+

@@ -1,10 +1,10 @@
 define([
 		"angular",
 		"dstore/Rest",
-		"angular-delite/ngStore"
-		], function(angular, Rest, ngStore){
+		"angular-delite/wrappers/Store""
+		], function(angular, Rest, wrapper){
 			angular.module("dstore.rest", [])
 				.factory("Rest", function($q){
-					return ngStore(Rest, $q);
+					return wrapper(Rest, $q);
 				});
 		});
