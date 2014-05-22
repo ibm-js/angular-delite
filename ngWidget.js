@@ -1,4 +1,4 @@
-define(["angular/angular"], function () {
+define(["angular"], function (angular) {
 	// helpers
 	var isUndefined = angular.isUndefined,
 		equals = angular.equals;

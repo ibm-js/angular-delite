@@ -1,12 +1,12 @@
 require([
+		"angular",
 		"delite/register",
 		"deliteful/list/List",
 		"angular-delite/ngWidget",
-		"angular-delite/samples/Store/ngRest",
-		"angular/angular",
-		], function(register, List, ngWidget){
+		"angular-delite/ngRest",
+		], function(angular, register, List, ngWidget){
 			
-			angular.module("app", ["ngRest"])
+			angular.module("app", ["Dstore.Rest"])
 					.factory("BookList", function (Rest) {
 						R = Rest;
 						return new Rest({target: "http://localhost:1337/book/"})
@@ -49,6 +49,5 @@ require([
 			// boostrapping my app on a particular DOM element
 			angular.element(document).ready(function () {
 				angular.bootstrap(document, ["app"]);	// start angular
-				//register.parse();						// start delite
 			});
 		});
