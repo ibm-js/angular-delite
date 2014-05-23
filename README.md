@@ -141,7 +141,7 @@ Instead use [this](#init).
 
 #### Using Rest and Memory
 `angular-delite/dstore/Rest` contains an angular module `"dstore.rest"` with a 
-factory `Rest` that holds the store contructor, and can be called in any controller.
+factory `Rest` that holds the store constructor, and can be called in any controller.
 
 ```js
 define([
@@ -162,6 +162,10 @@ define([
 			});
 	});
 ```
+Note that the original `dstore/Rest.js` store has a number of methods that return [dojo promises](http://dojotoolkit.org/reference-guide/1.8/dojo/promise.html).
+The `dstore.rest` module converts them to regular angular promises. Cf. [$q service API](https://docs.angularjs.org/api/ng/service/$q) documentation for more details on how to use them.
+				
+
 
 The memory store can be used the very same way.
 
@@ -178,8 +182,28 @@ define([
 	});
 ```
 
-It is advised to wrap your store instance in a angular factory or other provider, so that you 
-can properly use it from multiple controllers.
+It is advised to wrap your store instance in an angular factory or service, to make it behaves like 
+a singleton which you can properly use it from multiple controllers.
+
+```js
+define([
+	"angular",
+	"angular-delite/dstore/Memory"
+	], function (angular) {
+		angular.module("myApp", ["dstore.memory"])
+			.factory("mystore", function(Memory){
+				return new Memory({data: [...]});
+			})
+			.controller("OneCtrl", function($scope, mystore){
+				mystore.get(6);
+				...
+			});
+			.controller("AnotherCtrl", function($scope, mystore){
+				mystore.get(3);
+				...
+			});
+	});
+```
 
 #### The wrapper
 Similarly to delite widgets, a wrapper is provided for `dstores/*`. 
