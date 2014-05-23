@@ -200,8 +200,10 @@ define(["angular"], function (angular) {
 		Object.keys(isolatedScope).forEach(function (p) { 
 
 			// if prop in widget has a value, initialise the scope with it
-			if ( ! isUndefined(scope.widget[p]) ){
-				scope[p] = scope.widget[p];
+			// unless the scope has also a value
+			if (isUndefined(scope[p]) 
+				&& !isUndefined(scope.widget[p])) {
+					scope[p] = scope.widget[p];
 			}
 
 			// if attrs were initialized, overwrite widget value
