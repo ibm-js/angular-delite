@@ -15,7 +15,8 @@ a directive.
 1. Create a new directive in your app and give it a name (eg: `ngProgressBar`).
 `ngWidget` specifies your directive so that you end up with a custom element `<ng-progress-bar></ng-progress-bar>`
 that accepts attributes matching the `deliteful/ProgressBar` widget.
-```js
+
+	```js
 define([
 	"angular",
 	"angular-delite/wrappers/widget",
@@ -26,11 +27,14 @@ define([
 				return wrapper(ProgressBar);
 			});
 	});
-```
+	```
+
 2. Use you directive simply by invoking it in your app.
-```html
+
+	```html
 <ng-progress-bar value="30"></ng-progress-bar>
-```
+	```
+
 
 <a id="init"></a>
 ### Initialize the widget
