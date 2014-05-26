@@ -28,7 +28,7 @@ define(["angular"], function (angular) {
 	};
 
 	/**
-	 * creates an instance of the widget, using `init` if defined;
+	 * creates an instance of the widget, using `init` if defined.
 	 *
 	 * @param {module:deliteful/*} Constructor Constructor for a deliteful widget
 	 * @param {Function||Object} init Can be either a function that returns a widget instance or object used to initialize the widget
@@ -53,45 +53,54 @@ define(["angular"], function (angular) {
 	};
 	
 	/**
-	 * checks whether an attribute is an event attribute
+	 * checks whether an attribute is an event attribute.
 	 */
 	var isEventAttr = function(a){ 
 		return a.indexOf("on") === 0;  // checks if a starts with `on`
 	};
 
 	/**
-	 * transforms onClick to onclick
+	 * transforms onClick to onclick.
 	 */
 	var formatEventAttr = function(eventAttr) {
 		return eventAttr.toLowerCase();
 	};
 
+	/**
+	 * converts a value given as string after looking at its type.
+	 */
 	var setTypedValue = function (widget, name, strValue) {
-		// function
-		if (isEventAttr(name)) {
-			return (new Function(strValue)).bind(widget);
-		}
+		// NOTE: this function does almost the same thing as
+		// https://github.com/ibm-js/delite/blob/master/CustomElement.js#L102
+		// except that:
+		// - it doesn't do as much with objects, as angular handles it diffrently
+		// - it doesn't handle functions unless they are passed through a event attr (ex: on-click)
 
-		// number, boolean, object, string 
-		switch (typeof widget[name]) {
-			case "number":
-				return strValue - 0;
-			case "boolean":
-				return strValue !== "false";
-			case "object":
-				return strValue;
-			default: // "string"
-				return strValue;
+		if (isEventAttr(name)) { 
+			// function
+			return (new Function(strValue)).bind(widget);
+		} else { 
+			// number, boolean, object, string 
+			switch (typeof widget[name]) {
+				case "number":
+					return strValue - 0;
+				case "boolean":
+					return strValue !== "false";
+				case "object":
+					return strValue;
+				default: // "string"
+					return strValue;
+			}
 		}
 	};
 
 	/**
-	 * returns the attributes of directive
+	 * returns the attributes of directive.
 	 * @description takes raw attrs parameter of the directive and
 	 * makes up a clean version out of it with only relevant attrs.
-	 * @param {module:deliteful/*} widget The widget instance
-	 * @param {Object} rawAttrs The attributes hash as passed to the link function of the directive
-	 * @return {Object} a hash of (attributeName, attributeValue) pairs
+	 * @param {module:deliteful/*} widget The widget instance.
+	 * @param {Object} rawAttrs The attributes hash as passed to the link function of the directive.
+	 * @return {Object} a hash of (attributeName, attributeValue) pairs.
 	 */
 	var getAttrs = function (widget, isolatedScope, rawAttrs) {
 		var attrs = {};
@@ -112,19 +121,18 @@ define(["angular"], function (angular) {
 	};
 
 	/**
-	 * return a hash similar to attrs but containing only
-	 * attributes prefixed corresponding to an event
+	 * return a hash similar to attrs but containing only attributes prefixed corresponding to an event.
 	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs.
-	 * @return {Object} a hash of (eventAttributeName, eventAttributeValue) pairs 
+	 * @return {Object} a hash of (eventAttributeName, eventAttributeValue) pairs.
 	 */
 	var getEventAttrs = function (attrs) {
 		return ObjectFilter(attrs, isEventAttr);
 	};
 
 	/**
-	 * returns the id of a widget if any, null otherwise
-	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs
-	 * @return {String||Object} the value of id/data-id/x-id attribute or null
+	 * returns the id of a widget if any, null otherwise.
+	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs.
+	 * @return {String||Object} the value of id/data-id/x-id attribute or null.
 	 */
 	var getId = function (attrs) {
 		var allowed = ["id", "data-id", "x-id"];
@@ -138,12 +146,12 @@ define(["angular"], function (angular) {
 	};
 
 	/**
-	 * extracts all the properties of the widget
-	 * @description gets all the properties from the constructor then filters them using theses conditions
-	 *	1. property is not a function
-	 *	2. property is not one of ["baseClass", "focused", "widgetId", "invalidProperties" and "invalidRendering"]
-	 * @param {Object} Constructor 
-	 * @return {Array} An array containing the names of the properties of the widget that need to included in the isolated scope
+	 * extracts all the properties of the widget.
+	 * @description gets all the properties from the constructor then filters them using theses conditions:
+	 *	1. property is not a function ;
+	 *	2. property is not one of ["baseClass", "focused", "widgetId", "invalidProperties" and "invalidRendering"].
+	 * @param {module:deliteful/*} Constructor A widget constructor.
+	 * @return {Array} An array containing the names of the properties of the widget that need to included in the isolated scope.
 	 * */
 	var getProps = function (Constructor) {
 		// getting all the props
@@ -233,11 +241,11 @@ define(["angular"], function (angular) {
 	};
 
 	/**
-	 * inserts widget into parent scope
-	 * requires `id` to be correctly defined as a string
-	 * @param {Object} scope The scope of the directive
-	 * @param {module:deliteful/*} widget The widget instance
-	 * @param {String} id The value of the id attribute
+	 * inserts widget into parent scope.
+	 * requires `id` to be correctly defined as a string.
+	 * @param {Object} scope The scope of the directive.
+	 * @param {module:deliteful/*} widget The widget instance.
+	 * @param {String} id The value of the id attribute.
 	 */
 	var exposeToParentScope = function (scope, widget, id) {
 		if (! isUndefined(scope.$parent)) {
@@ -246,10 +254,10 @@ define(["angular"], function (angular) {
 	};
 
 	/**
-	 * sets watchers on props that are exposed to the parent scope
-	 * @param {Scope} scope The scope of the directive
-	 * @param {Object} isolatedScope The isolated scope hash
-	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs
+	 * sets watchers on props that are exposed to the parent scope.
+	 * @param {Scope} scope The scope of the directive.
+	 * @param {Object} isolatedScope The isolated scope hash.
+	 * @param {Object} attrs Attributes of the directive as a hash of (key, value) pairs.
 	 */
 	var setWatchers = function (scope, isolatedScope, attrs) {
 		Object.keys(isolatedScope).forEach(function (p) {
@@ -285,26 +293,28 @@ define(["angular"], function (angular) {
 	/** 
 	 * defines an angular `E` directive that holds the widget.
 	 * The scope is isolated.
-	 * @param {module:deliteful/*} Constructor 
+	 * @param {module:deliteful/*} Constructor A widget constructor.
+	 * @param {Object} overwrite A hash that overwrites the isolated scope.
+	 * @param {Function||Object} init Either a function that creates an instance and returns it or a hash that specifies a initial value for the widget instance.
 	 *
 	 * @example <caption>basic use case</caption>
 	 *  	angular.module("DeliteWidget", []).directive("deliteWidget", function () {
-	 *  		return ngWidget(List);
+	 *  		return wrap(List);
 	 *  	});
 	 *
 	 * @example <caption>Expose properties to parent scope</caption>
 	 *  	angular.module("DeliteWidget", []).directive("deliteWidget", function () {
-	 *  		return ngWidget(List, {selectedMode: '='});
+	 *  		return wrap(List, {selectedMode: '='});
 	 *  	});
 	 *
 	 * @example <caption>Initialize a widget</caption>
 	 *  	angular.module("DeliteWidget", []).directive("deliteWidget", function () {
-	 *  		return ngWidget(List, {}, {selectedMode: "Single"});
+	 *  		return wrap(List, {}, {selectedMode: "single"});
 	 *  	});
 	 *
-	 * @example <caption>Initialize a widget (other syntax)</caption>
+	 * @example <caption>Initialize a widget (alt. syntax)</caption>
 	 *  	angular.module("DeliteWidget", []).directive("deliteWidget", function () {
-	 *  		return ngWidget(List, {}, function(Constructor){
+	 *  		return wrap(List, {}, function(Constructor){
 	 *				var myList = new Constructor();
 	 *				myList.selectedMode = "Single";
 	 *				return myList;
@@ -312,7 +322,7 @@ define(["angular"], function (angular) {
 	 *  	});
 	 *
 	 */
-	var ngWidget = function (/*Widget*/ Constructor, /*Object*/ overwrite, /*Function || Object*/ init) {
+	var wrap = function (/*Widget*/ Constructor, /*Object*/ overwrite, /*Function||Object*/ init) {
 		// NOTE: the isolated scope is constituted of all the properties specific to a widget
 		// which are retrieved from the constructor. By default every property is passed as a 
 		// string then overwritten through the `overwrite`
@@ -351,5 +361,5 @@ define(["angular"], function (angular) {
 			}
 		};
 	};
-	return ngWidget;
+	return wrap;
 });
