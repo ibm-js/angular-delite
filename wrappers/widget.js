@@ -148,11 +148,11 @@ define(["angular"], function (angular) {
 	/**
 	 * extracts all the properties of the widget.
 	 * @description gets all the properties from the constructor then filters them using theses conditions:
-	 *	1. property is not a function ;
+	 *	1. property is not a function;
 	 *	2. property is not one of ["baseClass", "focused", "widgetId", "invalidProperties" and "invalidRendering"].
 	 * @param {module:deliteful/*} Constructor A widget constructor.
 	 * @return {Array} An array containing the names of the properties of the widget that need to included in the isolated scope.
-	 * */
+	 */
 	var getProps = function (Constructor) {
 		// getting all the props
 		var Spec = Constructor._ctor.prototype;
