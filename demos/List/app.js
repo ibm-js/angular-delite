@@ -3,7 +3,7 @@ require([
 		"delite/register",
 		"deliteful/list/List",
 		"angular-delite/wrappers/widget",
-		"angular-delite/dstore/Rest",
+		"angular-delite/dstore/ObservableRest",
 		], function(angular, register, List, wrapper){
 			
 			angular.module("app", ["dstore.rest"])
