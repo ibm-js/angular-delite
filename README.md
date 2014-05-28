@@ -29,7 +29,7 @@ define([
 	});
 	```
 
-2. Use you directive simply by invoking it in your app.
+2. Use your directive simply by invoking it in your app.
 
 	```html
 <ng-progress-bar value="30"></ng-progress-bar>
@@ -84,18 +84,18 @@ For example, in the case of `deliteful/ProgressBar`, the isolated scope by defau
 ```
 
 With such a scope, you can guess that our widget will accept attributes such as:
-`value="7"` or `display-ext-msg="true"`. - NB: see how the attribute name is a slugified 
-version of property name, but this shouldn't be news to people familiar with angular.
+`value="7"` or `display-ext-msg="true"`. -- NB: _notice how the attribute name is a slugified 
+version of the property name, but this shouldn't be news to people familiar with angular_.
 
 ##### The special case of event attributes
 
 You can use on the directive attributes such as `on-click`, `on-change`, ... which map directly
-to `myWidget.onClick` and `myWidget.onChange`.
+to `myWidget.onClick` and `myWidget.onChange`, ...
 
 You can write things like:
 
 ```html
-<ng-progress-bar on-click="console.log("value is", this.value)" value="30"></ng-progress-bar>
+<ng-progress-bar on-click="console.log('value is', this.value)" value="30"></ng-progress-bar>
 ```
 
 Also for practical reasons, `this` points to the widget instance, not the directive.
@@ -115,7 +115,7 @@ This will produce the following scope
 
 ```js
 {
-	value          : "=",
+	value          : "=", // now set to two ways binding
 	max            : "@",
 	min            : "@",
 	displayExtMsg  : "@",
@@ -127,8 +127,8 @@ This will produce the following scope
 ```html
 <div ng-controller="MyCtrl">
 	<input type="number" ng-model="v" />
-	<!-- variable `$scope.v` is mapped to the property "value" of the widget -->
 	<ng-progress-bar value="v"></ng-progress-bar>
+	<!-- variable `$scope.v` is mapped to the property "value" of the widget -->
 </div>
 ```
 
@@ -162,7 +162,7 @@ Instead use [this](#init).
 ### Using Rest and Memory
 
 `angular-delite/dstore/Rest` contains an angular module `"dstore.rest"` with a 
-factory `Rest` that holds the store constructor, and can be called in any controller.
+factory `Rest` that holds the store constructor and can be called in any controller.
 
 ```js
 define([
@@ -203,7 +203,7 @@ define([
 ```
 
 It is advised to wrap your store instance in an angular factory or service, to make it behaves like 
-a singleton which you can properly use it from multiple controllers.
+a singleton and properly interact with it from multiple controllers.
 
 ```js
 define([
@@ -228,7 +228,7 @@ define([
 ### The wrapper
 Similarly to delite widgets, a wrapper is provided for `dstores/*`. 
 This wrapper comes as a function that returns a specification for a factory.
-You can use it:
+Use it like this:
 
 ```js
 define([
