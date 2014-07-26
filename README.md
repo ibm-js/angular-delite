@@ -50,7 +50,7 @@ angular.module("myApp", [])
 	});
 ```
 
-You can also passing in instead a function with the only condition that it returns an instance of the widget.
+You can also pass in instead a function with the only condition that it returns an instance of the widget.
 
 ```js
 angular.module("myApp", [])
