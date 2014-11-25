@@ -3,14 +3,14 @@ define(["angular"], function (angular) {
 	var isUndefined = angular.isUndefined,
 		equals = angular.equals;
 
-	var ObjectOverwrite = function (obj1, obj2) {
+	var objectOverwrite = function (obj1, obj2) {
 		Object.keys(obj2).forEach(function (p) {
 			obj1[p] = obj2[p];
 		});
 		return obj1;
 	};
 
-	var ObjectFilter = function(input, func){
+	var objectFilter = function(input, func){
 		var output = {};
 		Object.keys(input).filter(function(k){
 			if (func(k, input[k])) {
@@ -18,9 +18,9 @@ define(["angular"], function (angular) {
 			}
 		});
 		return output;
-	}
+	};
 
-	var ArrayDiff = function (all, excluded) {
+	var arrayDiff = function (all, excluded) {
 		var isIncluded = function (property) {
 			return (excluded.indexOf(property) === -1);
 		};
@@ -31,7 +31,8 @@ define(["angular"], function (angular) {
 	 * creates an instance of the widget, using `init` if defined.
 	 *
 	 * @param {module:deliteful/*} Constructor Constructor for a deliteful widget
-	 * @param {Function||Object} init Can be either a function that returns a widget instance or object used to initialize the widget
+	 * @param {Function||Object} init Can be either a function that returns a widget instance 
+	 *                           or object used to initialize the widget
 	 * @return {module:deliteful/*} a widget instance  
 	 */
 	var createInstance = function (Constructor, init) {
@@ -78,6 +79,7 @@ define(["angular"], function (angular) {
 
 		if (isEventAttr(name)) { 
 			// function
+			/*jslint evil: true */
 			return (new Function(strValue)).bind(widget);
 		} else { 
 			// number, boolean, object, string 
@@ -107,7 +109,7 @@ define(["angular"], function (angular) {
 		Object.keys(rawAttrs.$attr).forEach(function(p){
 			if (isEventAttr(p)) { // if p starts with "on"
 				var fp = formatEventAttr(p); // converts "on-whatever" to "onwathever"
-				attrs[fp] = setTypedValue(widget, p, rawAttrs[p]);;
+				attrs[fp] = setTypedValue(widget, p, rawAttrs[p]);
 			} else {
 				if (isolatedScope[p] === "@") {
 					attrs[p] = setTypedValue(widget, p, rawAttrs[p]);
@@ -126,7 +128,7 @@ define(["angular"], function (angular) {
 	 * @return {Object} a hash of (eventAttributeName, eventAttributeValue) pairs.
 	 */
 	var getEventAttrs = function (attrs) {
-		return ObjectFilter(attrs, isEventAttr);
+		return objectFilter(attrs, isEventAttr);
 	};
 
 	/**
@@ -151,12 +153,14 @@ define(["angular"], function (angular) {
 	 *	1. property is not a function;
 	 *	2. property is not one of ["baseClass", "focused", "widgetId", "invalidProperties" and "invalidRendering"].
 	 * @param {module:deliteful/*} Constructor A widget constructor.
-	 * @return {Array} An array containing the names of the properties of the widget that need to included in the isolated scope.
+	 * @return {Array} An array containing the names of the properties of the widget that need to 
+	 *                 included in the isolated scope.
 	 */
 	var getProps = function (Constructor) {
 		// getting all the props
 		var Spec = Constructor._ctor.prototype;
 		var all = Spec._getProps(); // NOTE this gets all the props specific to a widget, even inherited;
+		all = Object.keys(all);
 
 		var excluded = ["baseClass", "focused", "widgetId", "invalidProperties", "invalidRendering"];
 		var isUnwanted = function (prop) {
@@ -166,7 +170,7 @@ define(["angular"], function (angular) {
 		excluded = excluded.concat(all.filter(isUnwanted));
 
 		// filtering relevant props
-		return ArrayDiff(all, excluded);
+		return arrayDiff(all, excluded);
 	};
 
 	/**
@@ -191,7 +195,7 @@ define(["angular"], function (angular) {
 		var props = getProps(Constructor);
 		var s = defaultScope(props);
 		if (typeof overwrite === "object") { // if overwrite defined, overwrite the scope
-			ObjectOverwrite(s, overwrite);
+			objectOverwrite(s, overwrite);
 		}
 		return s;
 	};
@@ -264,29 +268,35 @@ define(["angular"], function (angular) {
 			if (isolatedScope[p] === "=") { // do this only on '=' attrs
 
 				// if scope exposed property changes, update widget property
-				scope.$watch(p, function (newValue, oldValue) {
+				scope.$watch(p, function (newValue) {
 					if (!isUndefined(newValue) && ! equals(scope.widget[p], newValue)) {
 						scope.widget[p] = newValue;
 					}
 				});
-
-				// if widget exposed property changes, update scope property
-				scope.widget.watch(p, function (name, oldValue, newValue) {
-					if (p in attrs && 
-						! equals(scope.widget[p], scope[p])) {
+			}
+		});
+		scope.widget.observe(function(props){
+			
+			Object.keys(props).forEach(function (p) {
+				var isValid = (isolatedScope[p] === "=")
+					&& (p in attrs)
+					&& !equals(scope.widget[p], scope[p]);
+				if (isValid) {
 						(function (scope, p) {
-							if (! scope.$root.$$phase) { 
-								// NOTE: this seems to be the only & dirty way to avoid 
-								// the view refresh collision error 
+							if (! scope.$root.$$phase) {
+								// NOTE: this seems to be the only & dirty way to avoid
+								// the view refresh collision error
 								// https://github.com/angular/angular.js/wiki/Anti-Patterns
 								scope.$apply(function(){
 									scope[p] = scope.widget[p];
 								});
 							}
 						})(scope, p);
-					}
-				});
-			}
+				}
+			});
+
+
+			
 		});
 	};
 
@@ -295,7 +305,8 @@ define(["angular"], function (angular) {
 	 * The scope is isolated.
 	 * @param {module:deliteful/*} Constructor A widget constructor.
 	 * @param {Object} overwrite A hash that overwrites the isolated scope.
-	 * @param {Function||Object} init Either a function that creates an instance and returns it or a hash that specifies a initial value for the widget instance.
+	 * @param {Function||Object} init Either a function that creates an instance and returns it or a 
+	 *                           hash that specifies a initial value for the widget instance.
 	 *
 	 * @example <caption>basic use case</caption>
 	 *  	angular.module("DeliteWidget", []).directive("deliteWidget", function () {

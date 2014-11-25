@@ -1,19 +1,21 @@
 {
-	"name": "angular-delite",
-	"version": "0.1.0-dev",
-	"dependencies": {
-	},
-	"devDependencies": {
-		"intern": "1.6",
-		"grunt": "~0.4.2",
-		"grunt-contrib-jshint": "~0.6.3",
-		"grunt-contrib-uglify": "~0.2.2"
-	},
-	"licenses": [
-		{
-			"type": "BSD",
-			"url": "https://github.com/tkrugg/angular-delite/blob/master/LICENSE"
-		}
-	],
-	"bugs": "https://github.com/tkrugg/angular-delite/issues"
+  "name": "angular-delite",
+  "version": "0.1.0-dev",
+  "dependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-jshint": "~0.10.0"
+  },
+  "devDependencies": {
+    "intern": "1.6",
+    "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "~0.6.3",
+    "grunt-contrib-uglify": "~0.2.2"
+  },
+  "licenses": [
+    {
+      "type": "BSD",
+      "url": "https://github.com/tkrugg/angular-delite/blob/master/LICENSE"
+    }
+  ],
+  "bugs": "https://github.com/tkrugg/angular-delite/issues"
 }

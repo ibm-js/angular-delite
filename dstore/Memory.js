@@ -7,5 +7,4 @@ define([
 				.factory("Memory", function(){
 					return wrapper(Memory);
 				});
-		}
-});
+		});
