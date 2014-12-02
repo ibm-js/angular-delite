@@ -259,3 +259,5 @@ In case some of the functions of the store return promises, make sure to pass in
 		...
 ```
 
+## Licensing
+This project is distributed by the Dojo Foundation and licensed under the "New" BSD License. All contributions require a Dojo Foundation CLA.
